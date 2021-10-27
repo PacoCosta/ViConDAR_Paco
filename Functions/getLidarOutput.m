@@ -510,5 +510,7 @@ Output.TS.fullWF.dy = dy;
 Output.TS.fullWF.dz = dz;
 
 %save
-save_data_full_path = [input.LidarOutput_dir curFileInfo.name '.mat'];
-save(save_data_full_path,'Output')
+save_data_full_path_Output = [input.LidarOutput_dir curFileInfo.name '.mat'];
+save(save_data_full_path_Output,'Output','input')
+
+
