@@ -169,7 +169,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NEW
 % If the number of selected points within the probe length (input.points_av_slice) is higher than those contained in it, take all the points 
-if points_av_slice> floor(input.distance_av_space/distanceSlices)
+if points_av_slice> floor(input.distance_av_space/distanceSlices) || strcmpi(input.points_av_slice,'all')
     points_av_slice=floor(input.distance_av_space/distanceSlices);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
