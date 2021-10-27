@@ -503,4 +503,4 @@ Output.TS.fullWF.dz = dz;
 
 %save
 save_data_full_path = [input.LidarOutput_dir curFileInfo.name '.mat'];
-save(save_data_full_path,'Output')
+save(save_data_full_path,'Output','input')
