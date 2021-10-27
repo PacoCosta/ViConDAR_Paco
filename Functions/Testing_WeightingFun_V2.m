@@ -8,7 +8,7 @@
 
 %--------------------------------------------------------------------------
 
-function VFinalTotal_Time=Testing_WeightingFun_V2(input,LOS_points,VFinalTotal_TimeInt2,distanceSlices)
+function VFinalTotal_Time = Testing_WeightingFun_V2(input,LOS_points,VFinalTotal_TimeInt2,distanceSlices)
 if strcmpi(input.flag_probe_weighting,"mean")
     VFinalTotal_Time = mean(VFinalTotal_TimeInt2,'omitnan');
 elseif strcmpi(input.flag_probe_weighting,"gaussian")    
@@ -25,10 +25,10 @@ elseif strcmpi(input.flag_probe_weighting,"gaussian")
         else
             interval_of_confidence = input.distance_av_space; % limits for CW, since we all catch the points within the probe length
         end
-        distan                 = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
-        gaussian_w             = (1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);        
+        distan     = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
+        gaussian_w = (1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);        
         % Check that sum of probabilities is ~ 1.0
-        Sum_probabilities=sum((distan(2)-distan(1))*gaussian_w); %#ok<*NASGU>       
+        Sum_probabilities = sum((distan(2)-distan(1))*gaussian_w); %#ok<*NASGU>       
         % Performing weighted mean
         VFinalTotal_TimeInt3_NoNans             = isnan(VFinalTotal_TimeInt3); %finding nans
         gaussian_w(VFinalTotal_TimeInt3_NoNans) = nan;
