@@ -166,6 +166,14 @@ for iTra= 1:length(Y)
     LOS_2_In_matrix{iTra} =  In_2_LOS_matrix{iTra}^-1; % Inverse transformation: LOS_CS to Inertial_CS
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NEW
+% If the number of selected points within the probe length (input.points_av_slice) is higher than those contained in it, take all the points 
+if points_av_slice> floor(input.distance_av_space/distanceSlices) || strcmpi(input.points_av_slice,'all')
+    points_av_slice=floor(input.distance_av_space/distanceSlices);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if distance_av_slice ~= 0
     SliceVecInt = round((-distance_av_slice:distance_av_slice/points_av_slice:distance_av_slice))*distanceSlices;
     focus_distances = SliceVecInt+ref_plane_dist;
@@ -228,7 +236,7 @@ for ind_LOS = 1:length(Y)
         % could be used HERE like assuming a correlation between u and v 
         VFinalTotal_Time_reconstr_vec = [ LOS_2_In_matrix{ind_LOS}(1,:); [0 0 0]; [0 0 0]] *...
         [VFinalTotal_Time_LOS_vec(1);VFinalTotal_Time_LOS_vec(2) ;VFinalTotal_Time_LOS_vec(3) ] ;
-        
+    
         VFinalTotal_Time_U{ind_LOS}(ind_slice) = VFinalTotal_Time_reconstr_vec(1);
         VFinalTotal_Time_V{ind_LOS}(ind_slice) = VFinalTotal_Time_reconstr_vec(2);
         VFinalTotal_Time_W{ind_LOS}(ind_slice) = VFinalTotal_Time_reconstr_vec(3);
@@ -502,5 +510,7 @@ Output.TS.fullWF.dy = dy;
 Output.TS.fullWF.dz = dz;
 
 %save
-save_data_full_path = [input.LidarOutput_dir curFileInfo.name '.mat'];
-save(save_data_full_path,'Output')
+save_data_full_path_Output = [input.LidarOutput_dir curFileInfo.name '.mat'];
+save(save_data_full_path_Output,'Output','input')
+
+
