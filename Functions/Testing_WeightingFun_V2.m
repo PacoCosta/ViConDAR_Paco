@@ -17,9 +17,9 @@ elseif strcmpi(input.flag_probe_weighting,"gaussian")
     for ind_points = 1:size(VFinalTotal_TimeInt2,2)
         VFinalTotal_TimeInt3 = VFinalTotal_TimeInt2(:,ind_points);        
         % For a given fwhm (fwhm = 2*Rayleigh length) we calculate the normal distribution:
-        fwhm     = 2*input.distance_av_space;        
+        fwhm  = 2*input.distance_av_space;        
         % By definition sigma and fwhm are simply related as follows:
-        sigma                  = fwhm/(2*sqrt(2*log(2)));
+        sigma = fwhm/(2*sqrt(2*log(2)));
         if 1==1 % in the future want to implement the possibility of assessing CW lidars. The interval we apply the weighting function changes depending on the type of lidar
             interval_of_confidence = 4*sigma; % limits are chosen to ensure a high interval of confidence (4 sigma). This limit is for pulsed lidar, since we catch all the points within the pulse
         else
