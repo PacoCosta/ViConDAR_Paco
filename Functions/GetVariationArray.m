@@ -7,8 +7,8 @@
 % University of Stuttgart, Stuttgart Wind Energy (SWE) 2019
 
 
-function [ArrayVar,VariationPerVariable] = GetVariationArray(totalMat)
-
+function [ArrayVar,IndexChar,VariationPerVariable] = GetVariationArray(totalMat)
+IndexChar=[];
 ArrayVar = {};
 %     totalMat= [freeInp; UserFixed{iPat}];
 Variables = size(totalMat,1);
@@ -39,6 +39,7 @@ for i = 1:Variables-1
                 if ischar(totalMat{i+1,2}(iii))==1
                     IndexChar=i+1;
                     totalMat{i+1,2}(iii)=double(totalMat{i+1,2}(iii));
+%                     vv=double(totalMat{i+1, 2}(iii));
                     MatrixVar{iii,ii} = [ArrayVar{ii} double(totalMat{i+1, 2}(iii)) ]; %#ok<*AGROW> % creating matrix of variations                
                 else
                     MatrixVar{iii,ii} = [ArrayVar{ii} totalMat{i+1, 2}(iii) ]; %#ok<*AGROW> % creating matrix of variations                
