@@ -468,8 +468,8 @@ if input.flag_resampling == 1
     timestep_pat_vec = timestep_pat_vec/resampling_factor;
 else
     [~,colNaNslicesTime] = find(isnan(slicesTime));
-    ncolsdelete = unique(colNaNslicesTime);
-    slicesTime  = slicesTime(:,1:(end-length(ncolsdelete)));
+    ncolsdelete          = unique(colNaNslicesTime);
+    slicesTime           = slicesTime(:,1:(end-length(ncolsdelete)));
 end
 
 %% Create and save .mat lidar output
@@ -482,18 +482,18 @@ if input.flag_apply_noise == 1
 else
     Output.Parameter.Noise  = [] ;
 end
-Output.statistics       = statisticsOut;
-Output.TS.fullWF.time   = fullslicesTime;
-Output.Pattern.Coord    = [Y;Z];
-Output.Pattern.refplane = ref_plane_dist; %like focus distance
-Output.Pattern.timestep_pat_vec  = timestep_pat_vec; 
+Output.statistics                    = statisticsOut;
+Output.TS.fullWF.time                = fullslicesTime;
+Output.Pattern.Coord                 = [Y;Z];
+Output.Pattern.refplane              = ref_plane_dist; %like focus distance
+Output.Pattern.timestep_pat_vec      = timestep_pat_vec; 
 Output.Pattern.timeStep_Measurements = timeStep_Measurements; 
-Output.Pattern.distance_av_slice = distance_av_slice; 
-Output.Pattern.points_av_slice   = points_av_slice;
-Output.Pattern.timestep_pat_vec  = timestep_pat_vec;
-Output.Pattern.name              = input.PatternNames{curFileInfo.values{find(strcmp(curFileInfo.variables{1, 1},'Pat'))}};
-Output.Parameter.rotor_radius = rotor_radius; % Radius of the Rotor [m]
-Output.Parameter.Pos_Lidar    = input.Pos_LiDAR;
+Output.Pattern.distance_av_slice     = distance_av_slice; 
+Output.Pattern.points_av_slice       = points_av_slice;
+Output.Pattern.timestep_pat_vec      = timestep_pat_vec;
+Output.Pattern.name                  = input.PatternNames{curFileInfo.values{find(strcmp(curFileInfo.variables{1, 1},'Pat'))}};
+Output.Parameter.rotor_radius        = rotor_radius; % Radius of the Rotor [m]
+Output.Parameter.Pos_Lidar           = input.Pos_LiDAR;
 
 for iPat= 1:length(Y)
     Output.TS.fullWF.Uval{iPat} = VFinalTotal_U{iPat};
@@ -506,8 +506,8 @@ for iPat= 1:length(Y)
 end
 Output.TS.fullWF.nGridY = gridny;
 Output.TS.fullWF.nGridZ = gridnz;
-Output.TS.fullWF.dy = dy;
-Output.TS.fullWF.dz = dz;
+Output.TS.fullWF.dy     = dy;
+Output.TS.fullWF.dz     = dz;
 
 %save
 

@@ -8,7 +8,7 @@
 %--------------------------------------------------------------------------
 
 function [VFinalTotal,VFinalTotal_Time,Y1,Z1] = interpolationFun(input,component,LOS_points,gridy,gridz,distanceSlices,slicesDistance,focus_distances)
-if strcmpi(input.interpolation_slices,"interpolate")
+if strcmpi(input.interpolation_slices,'interpolate')
     for i1 = 1:size(LOS_points.slices,1) % loop over the points of pattern
         Y1 = LOS_points.Coor{i1}(1,:);
         Z1 = LOS_points.Coor{i1}(2,:);
@@ -47,7 +47,7 @@ if strcmpi(input.interpolation_slices,"interpolate")
         Mid_Z2=Z2(floor(length(Z2)/2)+1);
         VFinalTotal{ind_s} = interpn(gridz,slicesDistance,gridy,component,Mid_Z2,slicesDistance,Mid_Y2);
     end
-elseif strcmpi(input.interpolation_slices,"none") %if you don't interpolate get the closest point
+elseif strcmpi(input.interpolation_slices,'none') %if you don't interpolate get the closest point
     for i1 = 1:size(LOS_points.slices,1) % loop over the points of pattern
         Y1 = LOS_points.Coor{i1}(1,:);
         Z1 = LOS_points.Coor{i1}(2,:);
