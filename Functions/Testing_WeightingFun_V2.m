@@ -21,16 +21,16 @@ elseif strcmpi(input.flag_probe_weighting,"gaussian")
     % First we create the weights:
     for ind_points = 1:size(VFinalTotal_TimeInt2,2)
         VFinalTotal_TimeInt3 = VFinalTotal_TimeInt2(:,ind_points);
-
-        if 1==0
-            % if want to weight only the points within the probe volume. Then ~100% of the data (4sigma) is within the probe volume
-            interval_of_confidence = 4*sigma;
-        else
-            % Here we capture the selected points within the probe volume
-            % (input.points_av_slice) taking into account that the
-            % weighting function applies for all the space along the beam
-            interval_of_confidence = fwhm/2;
-        end
+        interval_of_confidence = 4*sigma; % Taken from literature (see "Comparison of methods to derive radial wind speed from a continuous-wave coherent lidar Doppler spectrum"  Held D. and Mann J. - 2018)
+%         if 1==1
+%             % if want to weight only the points within the probe volume. Then ~100% of the data (4sigma) is within the probe volume
+%             interval_of_confidence = 12*sigma;
+%         else
+%             % Here we capture the selected points within the probe volume
+%             % (input.points_av_slice) taking into account that the
+%             % weighting function applies for all the space along the beam
+%             interval_of_confidence = fwhm/2;
+%         end
         distan     = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
         
         %Remove Nans
@@ -53,15 +53,16 @@ elseif strcmpi(input.flag_probe_weighting,"pulsed")
     
     for ind_points = 1:size(VFinalTotal_TimeInt2,2)
         VFinalTotal_TimeInt3 = VFinalTotal_TimeInt2(:,ind_points);        
-        if 1==0
-            % if want to weight only the points within the probe volume. Then ~100% of the data (4sigma) is within the probe volume
-            interval_of_confidence = 4*sigma;
-        else
-            % Here we capture the selected points within the probe volume
-            % (input.points_av_slice) taking into account that the
-            % weighting function applies for all the space along the beam
-            interval_of_confidence = fwhm/2;
-        end
+%         if 1==1
+%             % if want to weight only the points within the probe volume. Then ~100% of the data (4sigma) is within the probe volume
+%             interval_of_confidence = 4*sigma;
+%         else
+%             % Here we capture the selected points within the probe volume
+%             % (input.points_av_slice) taking into account that the
+%             % weighting function applies for all the space along the beam
+%             interval_of_confidence = fwhm/2;
+%         end
+        interval_of_confidence = 4*sigma; %12*input.distance_av_space;% 4sigma implies almost 100% of the data
         distan     = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
         
         %Remove Nans
@@ -69,15 +70,15 @@ elseif strcmpi(input.flag_probe_weighting,"pulsed")
         
         % Pulsed lidar Weighting function:
         % Parameters to define the pulse shape (These should be placed elsewhere)
-        tau_meas = 265e-9; % Time of measurement
-        tau      = 165e-9; % Define the pulse
+        tau_meas = 665e-9; % Time of measurement
+        tau      = 275e-9; % Define the pulse
         c        = 2.99792458e8;
         
-        RWF                              = ((1/(tau_meas*c))*(erf((4*sqrt(log(2))*(distan)/((c*tau)))+(sqrt(log(2)))*tau_meas/tau)-erf((4*sqrt(log(2))*(distan)/((c*tau)))-(sqrt(log(2)))*tau_meas/tau)));
-        Sum_probabilities_RWF            = sum((distan(2)-distan(1))*RWF); %#ok<*NASGU>
+        Pulsed_WF                              = ((1/(tau_meas*c))*(erf((4*sqrt(log(2))*(distan)/((c*tau)))+(sqrt(log(2)))*tau_meas/tau)-erf((4*sqrt(log(2))*(distan)/((c*tau)))-(sqrt(log(2)))*tau_meas/tau))); % Taken from literature (see "LEOSPHERE Pulsed Lidar Principles" Cariou J.) 
+        Sum_probabilities_RWF                  = sum((distan(2)-distan(1))*Pulsed_WF); %#ok<*NASGU>
         % Performing weighted mean
-        RWF(VFinalTotal_TimeInt3_NoNans) = nan;
-        VFinalTotal_Time (:,ind_points)  = sum(RWF'.*VFinalTotal_TimeInt3,'omitnan')/sum(RWF,'omitnan'); %#ok<*AGROW>
+        Pulsed_WF(VFinalTotal_TimeInt3_NoNans) = nan;
+        VFinalTotal_Time (:,ind_points)        = sum(Pulsed_WF'.*VFinalTotal_TimeInt3,'omitnan')/sum(Pulsed_WF,'omitnan'); %#ok<*AGROW>
     end
 end
 end
