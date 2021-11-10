@@ -21,7 +21,7 @@ elseif strcmpi(input.flag_probe_weighting,"gaussian")
     % First we create the weights:
     for ind_points = 1:size(VFinalTotal_TimeInt2,2)
         VFinalTotal_TimeInt3 = VFinalTotal_TimeInt2(:,ind_points);
-        interval_of_confidence = input.distance_av_space; % Taken from literature (see "Comparison of methods to derive radial wind speed from a continuous-wave coherent lidar Doppler spectrum"  Held D. and Mann J. - 2018)
+        interval_of_confidence = input.distance_av_space; 
         distan     = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
         
         %Remove Nans
