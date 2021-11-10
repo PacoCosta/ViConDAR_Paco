@@ -10,7 +10,6 @@
 % University of Stuttgart, Stuttgart Wind Energy (SWE) 2019
 
 function perm_cell = getNamesFromInputs(input)
-
 nameBase = input.nameBase; 
 freeInp  = input.freeInp;
 fixedInp = input.fixedInp;
@@ -108,9 +107,10 @@ end
 
 %Create permutation names for all cases by adding the inputs together
 %Create names for lidar and processing
+
 for iPat = 1:numel(input.PatternNames)
-    totalMat = [freeInp; UserFixed{iPat}];
-    [ArrayVar,~] = GetVariationArray(totalMat); % Sorting them and finding all the unique combinations
+    totalMat = [freeInp; UserFixed{iPat}];    
+    [ArrayVar,IndexChar,~] = GetVariationArray(totalMat); % Sorting them and finding all the unique combinations
     TotalArrayVar{iPat} = ArrayVar;
     for iVary = 1:size(ArrayVar,1)
         if ~isempty(HiddenIndex)
@@ -120,10 +120,11 @@ for iPat = 1:numel(input.PatternNames)
         end
     end
 end
+IndexChar;
 
 %retrieve names of original windfields
 totalMatWF = [freeInp];
-[ArrayVarWF,~] = GetVariationArray(totalMatWF);
+[ArrayVarWF,~,~] = GetVariationArray(totalMatWF);
 
 %Create the total array for processing:
 FinalArrayVar = {};
@@ -138,6 +139,10 @@ for iAr = 1:size(FinalArrayVar,1)
     for  iVar = 1:length(CurArray)  % in pattern we want tochange the numerical value to string
         if strcmp(totalMat{iVar},'Pat')
             CurNam = [CurNam '_'  input.PatternNames{CurArray(iVar)} ];
+%         
+%         elseif iVar==IndexChar
+%             
+%             CurNam = [CurNam '_'  totalMat{iVar} char(ArrayVar{1}(IndexChar))];
         else
             if mod(CurArray(iVar),1) == 0  % check if the number is integer and change the notation accordingly
                 CurNam = [CurNam '_' totalMat{iVar} num2str(CurArray(iVar),'%02.f') ];                
