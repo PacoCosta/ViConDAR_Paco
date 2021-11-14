@@ -223,3 +223,38 @@ if input.plot_fullWF_Slices == 1
     plot_fullWF_Slices(input,perm_cell)
     disp('Plotting requested full wind field slices done')
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if input.flag_Qlundar==1
+        % Loop over requested wind fields
+    for iProcess = 1:size(perm_cell.OutNames,1)
+        % pass information to getLidarOutput
+        curFileInfo.name   = perm_cell.OutNames{iProcess};
+        curFileInfo.values = perm_cell.values{iProcess};
+        curFileInfo.variables = perm_cell.variables;
+        
+        % find the corresponding original WF based on names
+        for iName = 1:size(perm_cell.namesOWF,1)
+            Indexi = strfind (perm_cell.OutNames{iProcess},perm_cell.namesOWF{iName});
+            if Indexi == 1
+                indexvec(iName) = 1;
+            else
+                indexvec(iName) = 0;
+            end
+        end
+        curFileInfo.originalWF = perm_cell.namesOWF (find(indexvec==1))  ; %#ok<*FNDSB>
+        Output = Qlundar_wrapper(input,curFileInfo); % Obtain lidar measurements
+        disp([curFileInfo.name ' has been processed (' datestr(datetime) '):' ])
+    end
+    disp('Creating virtual lidar output finished successfully')
+    
+    
+    
+end
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
