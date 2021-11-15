@@ -223,7 +223,7 @@ if input.plot_fullWF_Slices == 1
     plot_fullWF_Slices(input,perm_cell)
     disp('Plotting requested full wind field slices done')
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 if input.flag_Qlundar==1
         % Loop over requested wind fields
