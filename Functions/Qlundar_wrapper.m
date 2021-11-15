@@ -36,4 +36,7 @@ for col_names=1:size(accum,2)
     TI_mean_WF    {1,col_names} = mean (TI_DATA_fullWF{row_names,col_names});
 end
 
-g=0;
+%save
+
+save_data_full_path = [input.Qlundar_TI  curFileInfo.name 'TI.mat'];
+save(save_data_full_path,'TI_mean_lidar','TI_mean_WF')
