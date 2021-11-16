@@ -8,8 +8,8 @@
 
 
 function [TI_Qlundar]=Qlundar_wrapper(input,perm_cell)
-
-% Obtain the names
+%
+% % Obtain the names
 % n_cases=(length(input.freeInp{1,2})*length(input.freeInp{3,2})*length(input.freeInp{4,2})*length(input.timestep_pat_vec {1})*length(input.timeStep_Measurements{1})) ;
 % for first=1:n_cases
 %     cummulative_name=1;
