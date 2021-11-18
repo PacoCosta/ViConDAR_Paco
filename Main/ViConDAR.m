@@ -226,13 +226,15 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%% 
 
 if input.flag_Qlundar==1
-
         % pass information to Qlundar_wrapper
-        
         TI_Qlundar=Qlundar_wrapper(input,perm_cell); % Obtain lidar measurements    
 end
 
-
+if input.flag_get_TI_Vs_Rz==1
+        % Getting TI values as a function of the rayleigh distance
+        
+        get_TI_Vs_Rz(input,perm_cell);    
+end
 
 
 
