@@ -46,11 +46,11 @@ elseif strcmpi(input.flag_probe_weighting,"pulsed")
         
         % Pulsed lidar Weighting function:
         c = 2.99792458e8; % speed of light        
-        Pulsed_WF                              = ((1/(input.tau_meas*c))*(erf((4*sqrt(log(2))*(distan)/((c*input.tau)))+(sqrt(log(2)))*input.tau_meas/input.tau)-erf((4*sqrt(log(2))*(distan)/((c*input.tau)))-(sqrt(log(2)))*input.tau_meas/input.tau))); % Taken from literature (see "LEOSPHERE Pulsed Lidar Principles" Cariou J.) 
-        Sum_probabilities_RWF                  = sum((distan(2)-distan(1))*Pulsed_WF); %#ok<*NASGU>
+        Pulsed_WeightFun                              = ((1/(input.tau_meas*c))*(erf((4*sqrt(log(2))*(distan)/((c*input.tau)))+(sqrt(log(2)))*input.tau_meas/input.tau)-erf((4*sqrt(log(2))*(distan)/((c*input.tau)))-(sqrt(log(2)))*input.tau_meas/input.tau))); % Taken from literature (see "LEOSPHERE Pulsed Lidar Principles" Cariou J.) 
+        Sum_probabilities_RWF                  = sum((distan(2)-distan(1))*Pulsed_WeightFun); %#ok<*NASGU>
         % Performing weighted mean
-        Pulsed_WF(VFinalTotal_TimeInt3_NoNans) = nan;
-        VFinalTotal_Time (:,ind_points)        = sum(Pulsed_WF'.*VFinalTotal_TimeInt3,'omitnan')/sum(Pulsed_WF,'omitnan'); %#ok<*AGROW>
+        Pulsed_WeightFun(VFinalTotal_TimeInt3_NoNans) = nan;
+        VFinalTotal_Time (:,ind_points)        = sum(Pulsed_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(Pulsed_WeightFun,'omitnan'); %#ok<*AGROW>
     end
 end
 end
