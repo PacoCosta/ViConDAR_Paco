@@ -40,7 +40,7 @@ for iTimeSlice = 1:length(input.time_fullWF_Slices) % loop over requested slices
         
         % loop over constrained wind fields with pyconturb that come from the same
         % original windfield
-        if input.plot_WF_slices_Pyconturb == 1 ;
+        if input.plot_WF_slices_Pyconturb == 1 
             pyconWFsInd = ~cellfun(@isempty,strfind(pyconturbWF_names,curNamOr)); %
             pyconWFs    = pyconturbWF_names(pyconWFsInd);
             for ipyconWF = 1:size(pyconWFs,2)
@@ -60,7 +60,7 @@ for iTimeSlice = 1:length(input.time_fullWF_Slices) % loop over requested slices
         
         % loop over constrained wind fields with turbsim that come from the same
         % original windfield
-        if input.plot_WF_slices_Turbsim == 1 ;
+        if input.plot_WF_slices_Turbsim == 1 
             turbsimWFsInd = ~cellfun(@isempty,strfind(turbsimWF_names,curNamOr)); %
             turbsimWFs = turbsimWF_names(turbsimWFsInd);
             for iturbsimWF = 1:size(turbsimWFs,2)
