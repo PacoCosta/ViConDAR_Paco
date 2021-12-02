@@ -11,7 +11,7 @@
 function VFinalTotal_Time = Testing_WeightingFun_V2(input,VFinalTotal_TimeInt2)
 if strcmpi(input.flag_probe_weighting,"mean")
     VFinalTotal_Time = mean(VFinalTotal_TimeInt2,'omitnan');
-elseif strcmpi(input.flag_probe_weighting,"gaussian")
+elseif strcmpi(input.flag_probe_weighting,"cw")
     % For a given fwhm (fwhm = 2*Rayleigh length) we calculate the normal distribution:
     fwhm  = 2*input.distance_av_space;
     % By definition sigma and fwhm are simply related as follows:
