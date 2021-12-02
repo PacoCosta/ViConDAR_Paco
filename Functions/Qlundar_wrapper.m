@@ -28,30 +28,31 @@ for ind_pattern=1: length(input.PatternNames)
         end        
     end
     % loading the windfields and calculate the mean for the different seeds
-    for col_names=1:size(accum,2)
-        for row_names =1:size(accum,1)
-            LoadWF(row_names,col_names)= load([input.LidarOutput_dir accum{row_names,col_names}]);
+    for col_names = 1:size(accum,2)
+        for row_names = 1:size(accum,1)
+            LoadWF(row_names,col_names) = load([input.LidarOutput_dir accum{row_names,col_names}]);
             % u-component
-            TI_DATA_lidar_U (row_names,col_names)= LoadWF(row_names,col_names).Output.statistics.U.lidar.TI_mean;
-            TI_DATA_fullWF_U(row_names,col_names)= LoadWF(row_names,col_names).Output.statistics.U.fullWF.TI_mean;
-            RMSE_U (row_names,col_names) = LoadWF (row_names,col_names).Output.statistics.U.lidar.RMSE;
+            TI_DATA_lidar_U (row_names,col_names) = LoadWF(row_names,col_names).Output.statistics.U.lidar.TI_mean;
+            TI_DATA_fullWF_U(row_names,col_names) = LoadWF(row_names,col_names).Output.statistics.U.fullWF.TI_mean;
+            RMSE_U (row_names,col_names)          = mean(LoadWF (row_names,col_names).Output.statistics.U.lidar.RMSE); % we mean between the different points in the pattern for the same seed wind field
             
             % v-component
-            TI_DATA_lidar_V (row_names,col_names)= LoadWF(row_names,col_names).Output.statistics.V.lidar.TI_mean;
-            TI_DATA_fullWF_V(row_names,col_names)= LoadWF(row_names,col_names).Output.statistics.V.fullWF.TI_mean;
-            RMSE_V (row_names,col_names) = LoadWF (row_names,col_names).Output.statistics.V.lidar.RMSE;
+            TI_DATA_lidar_V (row_names,col_names) = LoadWF(row_names,col_names).Output.statistics.V.lidar.TI_mean;
+            TI_DATA_fullWF_V(row_names,col_names) = LoadWF(row_names,col_names).Output.statistics.V.fullWF.TI_mean;
+            RMSE_V (row_names,col_names)          = mean(LoadWF (row_names,col_names).Output.statistics.V.lidar.RMSE);
             
             % w-component
-            TI_DATA_lidar_W (row_names,col_names)= LoadWF(row_names,col_names).Output.statistics.W.lidar.TI_mean;
-            TI_DATA_fullWF_W(row_names,col_names)= LoadWF(row_names,col_names).Output.statistics.W.fullWF.TI_mean;
-            RMSE_V (row_names,col_names) = LoadWF (row_names,col_names).Output.statistics.W.lidar.RMSE;
+            TI_DATA_lidar_W (row_names,col_names) = LoadWF(row_names,col_names).Output.statistics.W.lidar.TI_mean;
+            TI_DATA_fullWF_W(row_names,col_names) = LoadWF(row_names,col_names).Output.statistics.W.fullWF.TI_mean;
+            RMSE_V (row_names,col_names)          = mean(LoadWF(row_names,col_names).Output.statistics.W.lidar.RMSE);
             
         end
     end
-    TI_mean_lidar_U  = mean (TI_DATA_lidar_U);
-    TI_mean_WF_U     = mean (TI_DATA_fullWF_U);
+    % mean of windfiled characteristics from different seeds of the same wind field
+    TI_mean_lidar_U = mean (TI_DATA_lidar_U);
+    TI_mean_WF_U    = mean (TI_DATA_fullWF_U);
     RMSE_mean_U     = mean (RMSE_U);
-    for ind_err=1:size(TI_mean_WF_U,2)
+    for ind_err = 1:size(TI_mean_WF_U,2)
         error_U (1,ind_err) = 100*(abs(TI_mean_lidar_U(1,ind_err)-TI_mean_WF_U(1,ind_err))/TI_mean_WF_U(1,ind_err)); % error [%]
     end 
     %save data
@@ -60,7 +61,7 @@ for ind_pattern=1: length(input.PatternNames)
         TI_Qlundar.TI_mean_lidar_U = TI_mean_lidar_U (1,in_save);
         TI_Qlundar.TI_mean_WF_U    = TI_mean_WF_U(1,in_save);
         TI_Qlundar.error_U         = error_U(1,in_save);      % relative error in TI estimations 
-        TI_Qlundar.RMSE_mean_U     = RMSE_mean_U(1,in_save);  % relative error in TI estimations 
+        TI_Qlundar.RMSE_mean_U     = RMSE_mean_U(1,in_save);  
         
         save(save_data_full_path,'TI_Qlundar');
         disp(['Turbulence intensity for QlunDAR: ' accum{1,in_save} ' has been processed (' datestr(datetime) '):' ])
