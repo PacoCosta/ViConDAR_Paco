@@ -1,6 +1,7 @@
 %% Header
 %
-% Qlundar wrapper. Gets the names fron perm_cell and calculates the mean TI
+% Qlundar wrapper. Gets the names from perm_cell and calculates the mean TI
+% and mean RMSE
 % from the different seeds
 %
 % F.Costa
@@ -8,22 +9,22 @@
 
 
 
-function TI_Qlundar=Qlundar_wrapper(input,perm_cell)
+function TI_Qlundar = Qlundar_wrapper(input,perm_cell)
 ii_pat=0;
-for ind_pattern=1: length(input.PatternNames)
+for ind_pattern = 1: length(input.PatternNames)
     
     %     Obtain the names
     n_cases=(length(input.freeInp{1,2})*length(input.freeInp{3,2})*length(input.freeInp{4,2})*length(input.timestep_pat_vec {1})*length(input.timeStep_Measurements{1})) ;
-    for cases=1:n_cases
-        cummulative_name=1;
-        accum{1,cases}=perm_cell.OutNames{cases+ii_pat,1};
-        for perm_vals=1:size(perm_cell.values,1)
+    for cases = 1:n_cases
+        cummulative_name = 1;
+        accum{1,cases} = perm_cell.OutNames{cases+ii_pat,1};
+        for perm_vals = 1:size(perm_cell.values,1)
             for i = 1:size (perm_cell.values{1,1},2)
-                [v1{i}]=setdiff(perm_cell.values{cases+ii_pat,1}{i},perm_cell.values{perm_vals,1}{i});  %#ok<*NASGU,*AGROW> % identify the seeds
+                [v1{i}] = setdiff(perm_cell.values{cases+ii_pat,1}{i},perm_cell.values{perm_vals,1}{i});  %#ok<*NASGU,*AGROW> % identify the seeds
             end
             if ~isempty(v1{2}) && isempty(v1{1}) && isempty(v1{3})&& isempty(v1{4})&& isempty(v1{5})&& isempty(v1{6}) && isempty(v1{7})&& isempty(v1{8})&& isempty(v1{9}) && isempty(v1{10}) && isempty(v1{11}) && isempty(v1{12})
-                cummulative_name=1+cummulative_name;
-                accum{cummulative_name,cases}=perm_cell.OutNames{perm_vals,1}; % accumulate in the same column the names with same values but different seed
+                cummulative_name = 1+cummulative_name;
+                accum{cummulative_name,cases} = perm_cell.OutNames{perm_vals,1}; % accumulate in the same column the names with same values but different seed
             end
         end        
     end
@@ -57,7 +58,7 @@ for ind_pattern=1: length(input.PatternNames)
     end 
     %save data
     for in_save=1:size(accum,2)
-        save_data_full_path = [input.Qlundar_TI accum{1,in_save} '_TIout.mat'];
+        save_data_full_path        = [input.Qlundar_TI accum{1,in_save} '_TIout.mat'];
         TI_Qlundar.TI_mean_lidar_U = TI_mean_lidar_U (1,in_save);
         TI_Qlundar.TI_mean_WF_U    = TI_mean_WF_U(1,in_save);
         TI_Qlundar.error_U         = error_U(1,in_save);      % relative error in TI estimations 
