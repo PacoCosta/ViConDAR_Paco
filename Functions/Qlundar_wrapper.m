@@ -2,7 +2,7 @@
 %
 % Qlundar wrapper. Gets the names from perm_cell and calculates the mean TI
 % and mean RMSE
-% from the different seeds
+% from the different seeds.Testing rebase
 %
 % F.Costa
 % University of Stuttgart, Stuttgart Wind Energy (SWE) 2021
