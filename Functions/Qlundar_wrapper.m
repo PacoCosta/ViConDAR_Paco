@@ -48,15 +48,20 @@ for ind_pattern=1: length(input.PatternNames)
             
         end
     end
-    TI_Qlundar.TI_mean_lidar_U  = mean (TI_DATA_lidar_U);
-    TI_Qlundar.TI_mean_WF_U     = mean (TI_DATA_fullWF_U);
-    for ind_err=1:size(TI_Qlundar.TI_mean_WF_U,2)
-        TI_Qlundar.error_U (1,ind_err) = 100*(abs(TI_Qlundar.TI_mean_lidar_U(1,ind_err)-TI_Qlundar.TI_mean_WF_U(1,ind_err))/TI_Qlundar.TI_mean_WF_U(1,ind_err)); % error [%]
+    TI_mean_lidar_U  = mean (TI_DATA_lidar_U);
+    TI_mean_WF_U     = mean (TI_DATA_fullWF_U);
+    RMSE_mean_U     = mean (RMSE_U);
+    for ind_err=1:size(TI_mean_WF_U,2)
+        error_U (1,ind_err) = 100*(abs(TI_mean_lidar_U(1,ind_err)-TI_mean_WF_U(1,ind_err))/TI_mean_WF_U(1,ind_err)); % error [%]
     end 
     %save data
     for in_save=1:size(accum,2)
         save_data_full_path = [input.Qlundar_TI accum{1,in_save} '_TIout.mat'];
-%         TI_Qlundar=TIQlundar;
+        TI_Qlundar.TI_mean_lidar_U = TI_mean_lidar_U (1,in_save);
+        TI_Qlundar.TI_mean_WF_U    = TI_mean_WF_U(1,in_save);
+        TI_Qlundar.error_U         = error_U(1,in_save);      % relative error in TI estimations 
+        TI_Qlundar.RMSE_mean_U     = RMSE_mean_U(1,in_save);  % relative error in TI estimations 
+        
         save(save_data_full_path,'TI_Qlundar');
         disp(['Turbulence intensity for QlunDAR: ' accum{1,in_save} ' has been processed (' datestr(datetime) '):' ])
         
