@@ -23,7 +23,6 @@ elseif strcmpi(input.flag_probe_weighting,"cw")
         VFinalTotal_TimeInt3 = VFinalTotal_TimeInt2(:,ind_points);
         interval_of_confidence = input.distance_av_space; 
         distan     = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
-        focus_distance = sqrt(input.PatternY{1}^2+input.PatternY{1}^2+input.ref_plane_dist^2);
         %Remove Nans
         VFinalTotal_TimeInt3_NoNans = isnan(VFinalTotal_TimeInt3); %finding nans
         
