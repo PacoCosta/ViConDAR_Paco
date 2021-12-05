@@ -7,12 +7,17 @@
 % University of Stuttgart, Stuttgart Wind Energy (SWE) 2021
 
 
-function get_TI_Vs_Rz
+function get_TI_Vs_Rz(Zr)
 
 Pattern_name = '1P_Single';
+Sufix= '_TIout';
 V = '15';
 FD = '250';
+Sh='143';
+SD='01';
 indTI=1;
+
+
 for i_TI=input.freeInp{4,2}
     
     i_TI = num2str(i_TI);
@@ -30,9 +35,9 @@ for i_TI=input.freeInp{4,2}
         i_Tp = strrep(i_Tp,'.','d');
         
         ind=1;
-        for i_Dav = {'120','150','180','210','240','270','300'} % user puts here the number of points appearing in the name ('Dav')
+        for i_Zr = Zr % user puts here the number of points appearing in the name ('Dav')
             
-            load([input.Qlundar_TI input.nameBase '_Sh00_SD10_V' V '_TI' i_TI '_' Pattern_name '_Tp' i_Tp '_Tm00_Fd' FD '_DAv' i_Dav{1} '_TIout.mat']);
+            load([input.Qlundar_TI input.nameBase '_Sh' Sh '_SD' SD '_V' V '_TI' i_TI '_' Pattern_name '_Tp' i_Tp '_Tm00_Fd' FD '_DAv' i_Zr{1} Sufix '.mat']);
             TI_lidar2(:,ind)  = TI_Qlundar.TI_mean_lidar;
             TI_fullWF2(:,ind) = TI_Qlundar.TI_mean_WF;
             TI_error2(:,ind)   = TI_Qlundar.error;
