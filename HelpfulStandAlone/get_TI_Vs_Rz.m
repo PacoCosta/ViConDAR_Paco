@@ -40,6 +40,7 @@ for i_Tp = Tp
         i_TI = num2str(i_TI); %#ok<*FXSET>
         if size(i_TI,2)<2
             i_TI = ['0' i_TI]; %#ok<*AGROW>
+
         end
         ind1=1;
         for i_Zr = Zr % user puts here the number of points appearing in the name ('Dav')
@@ -51,6 +52,7 @@ for i_Tp = Tp
             Output_TI_Qlundar.RMSE_mean_U {ind0}(:,ind1) = TI_Qlundar.RMSE_mean_U;
             ind1=ind1+1;
         end
+
         ind0=ind0+1;
         legCell{1,ind_leg}=['e(TI) - TI = ' i_TI , ' Tp = ' num2str(Tp(ind2))];
         legCell2{1,ind_leg}=['RMSE(V) - TI = ' i_TI , ' Tp = ' num2str(Tp(ind2))];
@@ -74,7 +76,7 @@ for i_Tp = Tp
         
         plot(distance_av,Output_TI_Qlundar.RMSE_mean_U{i},'--','color', ColorSet(indColor,:))
         legend (legCell2,'Interpreter','None','FontSize',10)
-        
+
         yyaxis left
         ylabel('[%]')
         indColor=indColor+1;
@@ -107,4 +109,6 @@ for i_Tp = Tp
     ylabel('TI[%]')
     set(gca,'BoxStyle','full','CLim',CLimits_eTI,'Layer','top','Fontsize',19);
     ind2=ind2+1;
+
 end
+
