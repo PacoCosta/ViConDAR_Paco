@@ -44,7 +44,9 @@ for i_Tp = Tp
         for i_Zr = Zr % user puts here the number of points appearing in the name ('Dav'
             
             i_str_Zr=num2str(i_Zr);
-            i_str_Zr = strrep(i_Zr,'.','d');
+            if contains(i_str_Zr,'.')
+                i_str_Zr = strrep(i_str_Zr,'.','d');
+            end
             load([Qlunda_TI_directory nameBase '_Sh' Sh '_SD' SD '_V' V '_TI' i_TI '_' Pattern_name '_Tp' i_Tp '_Tm00_Fd' FD '_DAv' i_str_Zr Sufix '.mat']);
             Output_TI_Qlundar.TI_lidar_U{ind0}(:,ind1)   = TI_Qlundar.TI_mean_lidar_U;
             Output_TI_Qlundar.TI_fullWF_U{ind0}(:,ind1)  = TI_Qlundar.TI_mean_WF_U;
@@ -58,7 +60,7 @@ for i_Tp = Tp
         ind_leg=ind_leg+1;
         save([save_dir nameBase '_TI' i_TI '_Tp' i_Tp ], 'Output_TI_Qlundar')
     end
-%     ind2=ind2+1;
+    %     ind2=ind2+1;
     % Plotting
     figure,hold on
     for i = [1:size( Output_TI_Qlundar.TI_lidar_U,2)]
