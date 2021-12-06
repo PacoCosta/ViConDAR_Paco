@@ -14,7 +14,7 @@ Qlunda_TI_directory = '..\Qlundar_TI\';
 save_dir            = '..\Output_Qlundar_TI\';
 nameBase            = 'Qlundar';
 % Introduce wf inputs (base on the name of the wf stored in '..\Qlundar_TI\')
-Zr = [120   150   180   210   240   270   300];
+Zr = [120,150,180,210,240,270,300];
 Pattern_name        = '1P_Single';
 Sufix               = '_TIout';
 V                   = '15';
@@ -41,8 +41,10 @@ for i_Tp = Tp
             i_TI = ['0' i_TI]; %#ok<*AGROW>
         end
         ind1=1;
-        for i_Zr = Zr % user puts here the number of points appearing in the name ('Dav')
+        for i_Zr = Zr % user puts here the number of points appearing in the name ('Dav'
+            
             i_str_Zr=num2str(i_Zr);
+            i_str_Zr = strrep(i_Zr,'.','d');
             load([Qlunda_TI_directory nameBase '_Sh' Sh '_SD' SD '_V' V '_TI' i_TI '_' Pattern_name '_Tp' i_Tp '_Tm00_Fd' FD '_DAv' i_str_Zr Sufix '.mat']);
             Output_TI_Qlundar.TI_lidar_U{ind0}(:,ind1)   = TI_Qlundar.TI_mean_lidar_U;
             Output_TI_Qlundar.TI_fullWF_U{ind0}(:,ind1)  = TI_Qlundar.TI_mean_WF_U;
