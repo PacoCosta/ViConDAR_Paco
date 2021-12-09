@@ -1,71 +1,56 @@
-function VFinalTotal_Time=weighting_fun(input,LOS_points,VFinalTotal_TimeInt2,distanceSlices)
+%% Header
+%
+% Weighting function:
+% Weights the values retrieved by the lidar within the probe volume.
+%
+% V.Pettas/F.Costa
+% University of Stuttgart, Stuttgart Wind Energy (SWE) 2021
+
+%--------------------------------------------------------------------------
+
+function VFinalTotal_Time = weighting_fun(input,VFinalTotal_TimeInt2)
 if strcmpi(input.flag_probe_weighting,"mean")
     VFinalTotal_Time = mean(VFinalTotal_TimeInt2,'omitnan');
-elseif strcmpi(input.flag_probe_weighting,"gaussian")
-    % Introducing Gaussian weights in the performance of probe volume:
-    % First we create the weights:
-    prob_slices_distance = input.ref_plane_dist+(LOS_points.slicesAv*distanceSlices);
-    for ind_points=1:size(VFinalTotal_TimeInt2,2)
-        %             for i=1:size(VFinalTotal_TimeInt2{ind_points},2)
-        %                 VFinalTotal_TimeInt3=VFinalTotal_TimeInt2{ind_points}(:,i);
-        VFinalTotal_TimeInt3=VFinalTotal_TimeInt2(:,ind_points);
-        % For a given fwhm (fwhm = 2*Rayleigh length) we calculate the normal distribution:
-%         accuracy = 10;
-        fwhm     = 2*input.distance_av_space;
-        
-        %Sigma and fwhm are simply related as follows (by definition):
-        sigma          = fwhm/2.355;
-        distan = linspace(-5*sigma+input.ref_plane_dist,5*sigma+input.ref_plane_dist,size(VFinalTotal_TimeInt3,1));
-        gaussian = (1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan-input.ref_plane_dist)/sigma).^2);
-        
-        %Find the points above the fwhm
-        half_max       = (min(gaussian) + max(gaussian)) / 2;
-        probe_distance = distan(gaussian >= half_max); % distances above the fwhm
-        
-        % Distances at slices queried by the lidar may not match the distances wihin the probe volume. We take the closest points. Other method might be interpolate
-        
-        gaussian_factor = zeros(1, length(prob_slices_distance));% preallocation
-        % Round to the millimeter
-        distan         = round(distan,4);
-        probe_distance = round(probe_distance,4);
-        for ind_dist=1:length(prob_slices_distance) % for all the queried points within the probe volume
-            
-            query_point = find (distan==prob_slices_distance(ind_dist),1);
-            if isempty (query_point) % if the queried point is not in the distances vector created to perform the gaussian weights, take the closest
-                [~,ind] =min(abs(probe_distance-prob_slices_distance(ind_dist)));
-                gaussian_factor(1,ind_dist) = gaussian (distan==probe_distance(ind)); % gaussian factors for the distances queried by the lidar within the probe length
-                %                     gaussian_factor(1,ind_dist) = interp2();
-                
-            else
-                gaussian_factor(1,ind_dist) = gaussian (query_point);
-            end
-        end
-        
-        
-        % performing weighted mean
-        VFinalTotal_TimeInt3_NoNans                  = isnan(VFinalTotal_TimeInt3); %finding nans
-        gaussian_factor(VFinalTotal_TimeInt3_NoNans) = nan;
-        VFinalTotal_Time    (:,ind_points)       = sum(gaussian_factor'.*VFinalTotal_TimeInt3,'omitnan')/sum(gaussian_factor,'omitnan'); %#ok<AGROW>
-        
-        
-        
-        % Using cumulative distribution to perform probabilities
-        %             cumulative_probability = cumsum(gaussian)*(distan(2)-distan(1));
-        %             for ind_cum=1:length(slices_distance)
-        %                 [~,pos_cum]=min(abs(distan-slices_distance(ind_cum)));
-        
-        %                 index_cum{ind_cum}=[pos_cum,pos_cum+1];
-        %             end
-        %
-        %             for ind_cum1=1:length(index_cum)
-        %                 cum_prob(1,ind_cum1) =  (distan(index_cum{ind_cum1}(2))*cumulative_probability(index_cum{ind_cum1}(2)))-(distan(index_cum{ind_cum1}(1))*cumulative_probability(index_cum{ind_cum1}(1)));
-        %             end
-        %
-        %             % performing weighted mean with cumulative distribution:
-        %             VFinalTotal_Time2(:,i) = sum(cum_prob'.*VFinalTotal_TimeInt3,'omitnan');
-        
-        %             end
-        
-    end
+elseif strcmpi(input.flag_probe_weighting,"cw")
+    % For a given fwhm (FWHM = 2*Rayleigh length) we calculate the normal distribution:
+    % FWHM  = 2*input.distance_av_space;
+    % By definition sigma and fwhm are simply related as follows:
+    % sigma = FWHM/(2*sqrt(2*log(2)));
     
+    % Introducing CW weights in the calcualtion of probe volume:
+    % First we create the weights:
+    for ind_points = 1:size(VFinalTotal_TimeInt2,2)
+        VFinalTotal_TimeInt3 = VFinalTotal_TimeInt2(:,ind_points);
+        interval_of_confidence = input.distance_av_space; 
+        distan     = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
+        %Remove Nans
+        VFinalTotal_TimeInt3_NoNans = isnan(VFinalTotal_TimeInt3); %finding nans
+        
+        % Gaussian Weighting function
+        CW_WeightFun = (1/pi)*((input.distance_av_space/input.truncation_val)./((input.distance_av_space/input.truncation_val)^2+(distan.^2)));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
+
+% Check that sum of probabilities is ~ 0.76 (FWHM)
+        Sum_probabilities_CW = sum((distan(2)-distan(1))*CW_WeightFun); %#ok<*NASGU>
+        % Performing weighted mean
+        CW_WeightFun(VFinalTotal_TimeInt3_NoNans) = nan;
+        VFinalTotal_Time    (:,ind_points)      = sum(CW_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(CW_WeightFun,'omitnan'); %#ok<*AGROW>
+    end
+elseif strcmpi(input.flag_probe_weighting,"pulsed")   
+    for ind_points = 1:size(VFinalTotal_TimeInt2,2)
+        VFinalTotal_TimeInt3 = VFinalTotal_TimeInt2(:,ind_points);        
+        interval_of_confidence = input.distance_av_space;
+        distan     = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
+        
+        %Remove Nans
+        VFinalTotal_TimeInt3_NoNans = isnan(VFinalTotal_TimeInt3); %finding nans
+        
+        % Pulsed lidar Weighting function:
+        c = 2.99792458e8; % speed of light        
+        Pulsed_WeightFun                              = ((1/(input.tau_meas*c))*(erf((4*sqrt(log(2))*(distan)/((c*input.tau)))+(sqrt(log(2)))*input.tau_meas/input.tau)-erf((4*sqrt(log(2))*(distan)/((c*input.tau)))-(sqrt(log(2)))*input.tau_meas/input.tau))); % Taken from literature (see "LEOSPHERE Pulsed Lidar Principles" Cariou J.) 
+        Sum_probabilities_pulsed                  = sum((distan(2)-distan(1))*Pulsed_WeightFun); %#ok<*NASGU>
+        % Performing weighted mean
+        Pulsed_WeightFun(VFinalTotal_TimeInt3_NoNans) = nan;
+        VFinalTotal_Time (:,ind_points)        = sum(Pulsed_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(Pulsed_WeightFun,'omitnan'); %#ok<*AGROW>
+    end
+end
 end

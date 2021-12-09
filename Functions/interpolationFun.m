@@ -102,7 +102,7 @@ elseif strcmpi(input.interpolation_slices,'none') %if you don't interpolate get 
         end
         if length(LOS_points.slicesAv) ~= 1
             %             VFinalTotal_Time{i1} = weighting_fun(input,LOS_points,VFinalTotal_TimeInt2,distanceSlices);
-            VFinalTotal_Time{i1} = Testing_WeightingFun_V2(input,VFinalTotal_TimeInt2);
+            VFinalTotal_Time{i1} = weighting_fun(input,VFinalTotal_TimeInt2);
         else
             VFinalTotal_Time{i1} = VFinalTotal_TimeInt2;
         end
