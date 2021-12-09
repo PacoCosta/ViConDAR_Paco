@@ -8,7 +8,7 @@
 
 %--------------------------------------------------------------------------
 
-function VFinalTotal_Time = Testing_WeightingFun_V2(input,VFinalTotal_TimeInt2)
+function VFinalTotal_Time = weighting_fun(input,VFinalTotal_TimeInt2)
 if strcmpi(input.flag_probe_weighting,"mean")
     VFinalTotal_Time = mean(VFinalTotal_TimeInt2,'omitnan');
 elseif strcmpi(input.flag_probe_weighting,"cw")
