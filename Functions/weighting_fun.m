@@ -51,6 +51,8 @@ elseif strcmpi(input.flag_probe_weighting,"pulsed")
         % Performing weighted mean
         Pulsed_WeightFun(VFinalTotal_TimeInt3_NoNans) = nan;
         VFinalTotal_Time (:,ind_points)        = sum(Pulsed_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(Pulsed_WeightFun,'omitnan'); %#ok<*AGROW>
+        % Velocity spectra
+        [Mean_spec(:,ind_points), Maximum_spec(:,ind_points), Centroid_spec(:,ind_points)]=V_spec(VFinalTotal_TimeInt3,Pulsed_WeightFun);
     end
 end
 end
