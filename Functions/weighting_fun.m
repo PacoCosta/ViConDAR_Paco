@@ -37,6 +37,7 @@ elseif strcmpi(input.flag_probe_weighting,"cw")
     end
 elseif strcmpi(input.flag_probe_weighting,"pulsed")   
     for ind_points = 1:size(VFinalTotal_TimeInt2,2)
+%         ind_points
         VFinalTotal_TimeInt3   = VFinalTotal_TimeInt2(:,ind_points);        
         interval_of_confidence = input.distance_av_space;
         distan                 = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));       
@@ -47,11 +48,11 @@ elseif strcmpi(input.flag_probe_weighting,"pulsed")
         Pulsed_WeightFun         = ((1/(input.tau_meas*c))*(erf((4*sqrt(log(2))*(distan)/((c*input.tau)))+(sqrt(log(2)))*input.tau_meas/input.tau)-erf((4*sqrt(log(2))*(distan)/((c*input.tau)))-(sqrt(log(2)))*input.tau_meas/input.tau))); % Taken from literature (see "LEOSPHERE Pulsed Lidar Principles" Cariou J.) 
         Sum_probabilities_pulsed = sum((distan(2)-distan(1))*Pulsed_WeightFun); %#ok<*NASGU>
         Pulsed_WeightFun_NoNans  = Pulsed_WeightFun(~isnan(VFinalTotal_TimeInt3));
-
+%         cc=cumsum(Pulsed_WeightFun)
 %         VFinalTotal_Time (:,ind_points)        = sum(Pulsed_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(Pulsed_WeightFun,'omitnan'); %#ok<*AGROW>
         
         % Velocity spectra and peak detection methods
-        VFinalTotal_Time (:,ind_points) = V_spec(input,VFinalTotal_TimeInt3_NoNans,Pulsed_WeightFun_NoNans);
+        VFinalTotal_Time (:,ind_points) = V_spec(input,VFinalTotal_TimeInt3_NoNans,Pulsed_WeightFun_NoNans,distan);
 
     end
 end
