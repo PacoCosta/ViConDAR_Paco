@@ -1,7 +1,7 @@
 
 function Vfinal=fit_cdf(X,Y)
 
-% MEthod 1
+% Method 1
 % fcn = @(b,x) normcdf(x, b(1), b(2));                    % Objective Function
 % NRCF = @(b) norm(Y - fcn(b,X));                     % Norm Residual Cost Function
 % B = fminsearch(NRCF, [0; 10]);                          % Estimate Parameters
