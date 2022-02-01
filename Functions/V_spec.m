@@ -48,7 +48,7 @@ for ind_bin = binrang %floorS1:binwidth:ceilS1 %13:binwidth:16 %
     for iii = 1:length(VFinalTotal_TimeInt3)
         if (ind_bin<VFinalTotal_TimeInt3(iii)) && (VFinalTotal_TimeInt3(iii) <=ind_bin+binwidth)
             %             DSpectrum(iv,i_bin)      = VFinalTotal_TimeInt3(iii)*WeightFun(iii)*abs(distan(iii));
-            DSpectrum(iv,i_bin)      = WeightFun(iii)*abs(distan(iii));            
+            DSpectrum(iv,i_bin)      = WeightFun(iii)*abs(distan(iii));
         else
             DSpectrum(iv,i_bin)      = 0;
         end
@@ -74,12 +74,20 @@ for ind_peak_method=1:size(input.peak_detection_method,2)
         %Max: Computes the maximum of the histogram.
         fn_DF            = fnplt(DF, 'g', 2);
         [~,n_max]        =(max(fn_DF(2,:)));
-        VFinalTotal_Time = fn_DF(1,n_max);        
+        VFinalTotal_Time = fn_DF(1,n_max);
     elseif strcmpi (input.peak_detection_method{ind_peak_method},"centroid")
         %Centroid
-        VFinalTotal_Time = sum(SumSpectrum.*binrang)/sum(SumSpectrum);        
+        VFinalTotal_Time = sum(SumSpectrum.*binrang)/sum(SumSpectrum);
+%         fn_DF            = fnplt(DF, 'g', 2);        
+%         new_binranag=linspace(min(binrang),max(binrang),length(fn_DF));
+                
+%         VFinalTotal_Time = sum(fn_DF(2,:).*new_binranag)/sum(fn_DF(2,:));
+
+%         fn_DF            = fnplt(DF, 'g', 2);
+%         VFinalTotal_Time = spectralCentroid(fn_DF(2,:));
+%         VFinalTotal_Time = sum(fn_DF(2,:).*vv*binwidth)/sum(fn_DF(2,:)*binwidth);
     elseif strcmpi(input.peak_detection_method{ind_peak_method},"mean")
-        %Mean: Computes the mean of the values whithin the probe volume
+        %Mean: Computes the mean of the values whithin the probe volume        
         VFinalTotal_Time = sum(WeightFun'.*VFinalTotal_TimeInt3)/sum(WeightFun); %#ok<*AGROW>
     end
 end
@@ -88,7 +96,7 @@ end
 
 
 
-
+% 
 % 
 % figure, bar(binrang,SumSpectrum,'hist')
 % hold on
