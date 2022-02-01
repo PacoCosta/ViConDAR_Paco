@@ -33,7 +33,8 @@ elseif strcmpi(input.flag_probe_weighting,"cw")
         Sum_probabilities_CW = sum((distan(2)-distan(1))*CW_WeightFun); %#ok<*NASGU>
         % Performing weighted mean
         CW_WeightFun(VFinalTotal_TimeInt3_NoNans) = nan;
-        VFinalTotal_Time(:,ind_points) = sum(CW_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(CW_WeightFun,'omitnan'); %#ok<*AGROW>
+        VFinalTotal_Time(:,ind_points) = V_spec(input,VFinalTotal_TimeInt3_NoNans,CW_WeightFun,distan); %#ok<*AGROW>
+%         VFinalTotal_Time(:,ind_points) = sum(CW_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(CW_WeightFun,'omitnan'); %#ok<*AGROW>
     end
 elseif strcmpi(input.flag_probe_weighting,"pulsed")
     for ind_points = 1:size(VFinalTotal_TimeInt2,2)
