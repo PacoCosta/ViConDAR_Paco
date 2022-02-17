@@ -94,27 +94,12 @@ end
 
 %% Plot the histograms
 
-
-
 % 
 % 
 % figure, bar(binrang,SumSpectrum,'hist')
 % hold on
 % fnplt(DF, 'r', 2)
 % hold off
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 % figure,
 % f=bar(binrang,Hist_size_Spec,'histc');
