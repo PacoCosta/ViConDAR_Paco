@@ -1,9 +1,9 @@
 %% Header
 %
 % Lidar simulator. Create the output file including timeseries, errors and
-% statistics from the lidar measurements. 
+% statistics from the lidar measurements.
 %
-% V.Pettas/F.Costa 
+% V.Pettas/F.Costa
 % University of Stuttgart, Stuttgart Wind Energy (SWE) 2019
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -18,7 +18,7 @@ function Output = getLidarOutput(input,curFileInfo)
 
 
 %% IO/parameter definition
- 
+
 % Turbine parameters
 rotor_radius = input.rotor_radius; % Radio of the Rotor [m]
 Zh           = input.Zh;           % HubHeight [m]
@@ -31,7 +31,7 @@ points_av_slice   = cell2mat(curFileInfo.values (find(strcmp((curFileInfo.variab
 Y = input.PatternY{cell2mat(curFileInfo.values (find(strcmp((curFileInfo.variables{1, 1}),'Pat')))),1}; % lidar pattern coordinates lateral (m)
 Z = input.PatternZ{cell2mat(curFileInfo.values (find(strcmp((curFileInfo.variables{1, 1}),'Pat')))),1}; % lidar pattern coordinates vertical (m)
 timeStep_Measurements = cell2mat(curFileInfo.values (find(strcmp((curFileInfo.variables{1, 1}),'Tm'))));% [s] Time required for a single point measurement
-timestep_pat_vec = cell2mat(curFileInfo.values (find(strcmp((curFileInfo.variables{1, 1}),'Tp'))));     % [s] Time required for a full scan 
+timestep_pat_vec = cell2mat(curFileInfo.values (find(strcmp((curFileInfo.variables{1, 1}),'Tp'))));     % [s] Time required for a full scan
 
 if timestep_pat_vec < timeStep_Measurements*length(Y) % throw error if timesteps dont match
     error ('Time step of pattern is smaller than the timestep of measures x number of points. Cannot continue')
@@ -85,7 +85,7 @@ for i=1:gridtime
     compW(:,i,:)=flipud(SqueezeCompW{i}');
 end
 
-%% Discretization 
+%% Discretization
 
 fullTime       = (dt*gridtime)-dt; %total time duration of the windfield
 fullslicesTime = 0:dt:fullTime;
@@ -101,13 +101,17 @@ for ipoint = 1:length(Y) % different time and slices for each point!!
     end
     if length(slicesTimeN)<length(0:timestep_pat_vec:fullTime) % check that the time vector has the same length for all points
         slicesTimeN(end+1:length(0:timestep_pat_vec:fullTime)) = nan ;
-    end   
+    end
     if ipoint>1 && length(slicesN)<length(slices(ipoint-1,:)) % check to make sure that the total length is correct comparedto the other points
-       slicesN(end+1:length(slices(ipoint-1,:))) = nan ;
+        slicesN(end+1:length(slices(ipoint-1,:))) = nan ;
     end
     
     slices(ipoint,:)     =  slicesN; %#ok<*AGROW> requested slices for scanning
     slicesTime(ipoint,:) =  slicesTimeN; % time of slices
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %NEW
+    slicesSpace(ipoint,:) = slicesTime(ipoint,:)*Uref;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     icunt1 = icunt1 +1;
     clear slicesN slicesTimeN
 end
@@ -127,11 +131,11 @@ if ~isempty(SlicestoCut)
     slicesTime = slicesTime(:,1:end-MaxColumn);
 end
 
-distance_av_slice = distance_av_space/(distanceSlices); %transforming the distance in space to slices count
+% distance_av_slice = distance_av_space/(distanceSlices); %transforming the distance in space to slices count
 
 %% Rotate wind field for adding yaw and tilt inflow offsets
 
-if input.yaw_angle ~= 0 && input.tilt_angle ~= 0 
+if input.yaw_angle ~= 0 && input.tilt_angle ~= 0
     [compU,compV,compW] = RotateWindfield(compU,compV,compW,input); % Not yet pushed
 end
 
@@ -141,12 +145,15 @@ for num_tr = 1:length (Y)
     trajectory(:,num_tr) = [Y(num_tr);Z(num_tr)]; %#ok<*SAGROW>  first line is y direction second is z. Origin is (Pos_LiDAR(1),Pos_LiDAR(2))==0
     trajectory_forAng(:,num_tr) = [Y(num_tr)+Pos_LiDAR(1);Z(num_tr)+Pos_LiDAR(2)]; %#ok<*SAGROW>  Offset is included here to calculate the changed LOS. first line is y direction second is z. Origin is (Pos_LiDAR(1),Pos_LiDAR(2))==0
 end
-
+distance_av_slice = distance_av_space/(distanceSlices);
 % loop over trajectory to find LOS angles (constant for all repeated measurement points)
 if input.flag_apply_LOS == 1
     for i_ang = 1:size(trajectory_forAng,2)
         angley(i_ang) = atand(trajectory_forAng(1,i_ang)/ref_plane_dist) ;
         anglez(i_ang) = atand(trajectory_forAng(2,i_ang)/ref_plane_dist) ;
+        %         r(i_ang)=sqrt(ref_plane_dist^2+trajectory_forAng(1,i_ang)^2+trajectory_forAng(2,i_ang)^2);
+        %         royal_dist(i_ang)= distance_av_space*ref_plane_dist/r(i_ang);
+        %         distance_av_slice(i_ang) = royal_dist(i_ang)/(distanceSlices); %transforming the distance in space to slices count
     end
 else
     for i_ang = 1:size(trajectory_forAng,2)
@@ -158,21 +165,61 @@ end
 %get the transformation matrices for each pattern point. look at https://en.wikipedia.org/wiki/Rotation_matrix
 for iTra= 1:length(Y)
     In_2_LOS_matrix{iTra} = [cosd(anglez(iTra))*cosd(angley(iTra))   -cosd(anglez(iTra))*sind(angley(iTra))   sind(anglez(iTra));
-                             sind(angley(iTra))                      cosd(angley(iTra))                                 0  ;
-                             sind(angley(iTra))*cosd(anglez(iTra))   -sind(anglez(iTra))*sind(angley(iTra))   cosd(anglez(iTra)) ];
+        sind(angley(iTra))                      cosd(angley(iTra))                                 0  ;
+        sind(angley(iTra))*cosd(anglez(iTra))   -sind(anglez(iTra))*sind(angley(iTra))   cosd(anglez(iTra)) ];
     %     In_2_LOS_matrix{iTra} = [cosd(anglez(iTra))*cosd(angley(iTra))   -sind(anglez(iTra))   cosd(anglez(iTra))*sind(angley(iTra));
     %         sind(anglez(iTra))*cosd(angley(iTra))    cosd(anglez(iTra))   sind(anglez(iTra))*sind(angley(iTra)) ;
     %         -sind(angley(iTra))                     0                     cosd(angley(iTra))];
     LOS_2_In_matrix{iTra} =  In_2_LOS_matrix{iTra}^-1; % Inverse transformation: LOS_CS to Inertial_CS
 end
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NEW
-% If the number of selected points within the probe length (input.points_av_slice) is higher than those contained in it, take all the points 
+% If the number of selected points within the probe length (input.points_av_slice) is higher than those contained in it, take all the points
 if points_av_slice> floor(input.distance_av_space/distanceSlices) || strcmpi(input.points_av_slice,'A')
     points_av_slice=floor(input.distance_av_space/distanceSlices);
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Look for the points along the beam trajectory
+
+focus_point_dis = sqrt(ref_plane_dist.^2+trajectory_forAng(1,:).^2+trajectory_forAng(2,:).^2);
+for ind_ang=1:length(angley)
+    dis_points(1,ind_ang) = distanceSlices/(cosd(angley(1,ind_ang))*cosd(anglez(1,ind_ang)));% distance of points along the trajectory within the probe length
+end
+
+ll = focus_point_dis;
+ul = ll;
+for ind_dist=1:length(focus_point_dis)
+    nn = 1;
+    while nn<points_av_slice+1
+        low_lim(nn)  = ll(1,ind_dist)-dis_points(1,ind_dist);
+        up_lim(nn)   = ul(1,ind_dist)+dis_points(1,ind_dist);
+        ll(ind_dist) = low_lim(nn);
+        ul(ind_dist) = up_lim(nn);
+        nn=nn+1;
+    end
+    points_probe = [sort(low_lim(1,:)),focus_point_dis(ind_dist),up_lim(1,:)];
+    c(ind_dist)            = sqrt(focus_point_dis(ind_dist)^2-trajectory_forAng(2,ind_dist)^2);
+    point_probez(ind_dist,:) = trajectory_forAng(2,ind_dist)*points_probe/focus_point_dis(ind_dist);
+    
+    for ind_sign=1:length(points_probe)
+        if points_probe(ind_sign)>0
+            c_prima(ind_dist,ind_sign) = sqrt(points_probe(ind_sign).^2-point_probez(ind_sign).^2);
+        elseif points_probe(ind_sign)<0
+            c_prima(ind_dist,ind_sign) = -sqrt(points_probe(ind_sign).^2-point_probez(ind_sign).^2);
+        end
+    end
+    point_probey(ind_dist,:) = trajectory_forAng(1,ind_dist).*c_prima(ind_dist,:)./c(ind_dist);
+    point_probex(ind_dist,:) = c_prima(ind_dist,:).*ref_plane_dist./c(ind_dist);
+end
+% for ind_point_probe=1:length(point_probey)
+%     %     interpolationmagical(ind_point_probe,:) =interpn(gridz,slicesDistance,gridy,compU,point_probez(ind_point_probe),point_probex(ind_point_probe),point_probey(ind_point_probe));
+%     interpolationmagical =interpn(gridz,slicesDistance,gridy,compU,point_probez,point_probex,point_probey);
+%
+% end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 if distance_av_slice ~= 0
     SliceVecInt = round((-distance_av_slice:distance_av_slice/points_av_slice:distance_av_slice))*distanceSlices;
@@ -205,13 +252,16 @@ end
 for num_tr3 = 1:length (Y)
     LOS_points.slices(num_tr3,:)     = slices(num_tr3,:);
     LOS_points.slicesTime(num_tr3,:) = slicesTime(num_tr3,:);
-    for iTraj2 = 1:size(plane_traj,2)
-        LOS_points.Coor{num_tr3}(:,iTraj2) = plane_traj{1,iTraj2}(:,num_tr3); %this variable saves coordinates according to trajectory points
-    end
+        for iTraj2 = 1:size(plane_traj,2)
+            LOS_points.Coor1{num_tr3}(:,iTraj2) = plane_traj{1,iTraj2}(:,num_tr3); %this variable saves coordinates according to trajectory points
+    LOS_points.Coor{num_tr3}=[point_probey(num_tr3,:);point_probez(num_tr3,:)];
+    
+        end
 end
 
+
 % extract the measured slices as well as the full time series. Here is also
-% the averaging (or any other mnanipulation) for the multiple slices. NO LOS here
+% the averaging (or any other manipulation) for the multiple slices. NO LOS here
 % Here is calculated the mean velocity of all the points in the pattern every time LiDAR completes one
 % pattern (frequency of the pattern) taking into account timstep_meas.
 
@@ -225,7 +275,7 @@ for ind_LOS = 1:length(Y)
     for ind_slice = 1:length(VFinalTotal_Time_U{ind_LOS})
         %multiplyng all the slice with the transformation matrix
         VFinalTotal_Time_LOS_vec =  In_2_LOS_matrix{ind_LOS} * ...
-        [VFinalTotal_Time_U{ind_LOS}(ind_slice);VFinalTotal_Time_V{ind_LOS}(ind_slice);VFinalTotal_Time_W{ind_LOS}(ind_slice)];
+            [VFinalTotal_Time_U{ind_LOS}(ind_slice);VFinalTotal_Time_V{ind_LOS}(ind_slice);VFinalTotal_Time_W{ind_LOS}(ind_slice)];
         %      Get the measured wind speeds in LOS coordinates
         VFinalTotal_Time_LOS_U{ind_LOS}(ind_slice) = VFinalTotal_Time_LOS_vec(1); %#ok<NASGU>
         VFinalTotal_Time_LOS_V{ind_LOS}(ind_slice) = VFinalTotal_Time_LOS_vec(2); %#ok<NASGU>
@@ -233,10 +283,10 @@ for ind_LOS = 1:length(Y)
         
         %%%%%%%%%%%%%%%%%%%%%% WIND FIELD RECONSTRUCTION %%%%%%%%%%%%%%%%%%
         % assuming w and v equal to 0 in order to reconstruct. Other methods
-        % could be used HERE like assuming a correlation between u and v 
+        % could be used HERE like assuming a correlation between u and v
         VFinalTotal_Time_reconstr_vec = [ LOS_2_In_matrix{ind_LOS}(1,:); [0 0 0]; [0 0 0]] *...
-        [VFinalTotal_Time_LOS_vec(1);VFinalTotal_Time_LOS_vec(2) ;VFinalTotal_Time_LOS_vec(3) ] ;
-    
+            [VFinalTotal_Time_LOS_vec(1);VFinalTotal_Time_LOS_vec(2) ;VFinalTotal_Time_LOS_vec(3) ] ;
+        
         VFinalTotal_Time_U{ind_LOS}(ind_slice) = VFinalTotal_Time_reconstr_vec(1);
         VFinalTotal_Time_V{ind_LOS}(ind_slice) = VFinalTotal_Time_reconstr_vec(2);
         VFinalTotal_Time_W{ind_LOS}(ind_slice) = VFinalTotal_Time_reconstr_vec(3);
@@ -299,7 +349,7 @@ for ind_slicesDistance = 1:length (slicesDistance) % loop over all the slices
     else
         noZeroSlice = nonzeros(ExSlice_U);
         REWS.fullWF.TS(ind_slicesDistance) = mean(noZeroSlice,'omitnan');
-    end  
+    end
 end
 REWS.fullWF.mean = mean(REWS.fullWF.TS,'omitnan');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -336,11 +386,11 @@ end
 %TODO: maybe add an option to calculate shear on every nth slice of the full field to reduce time
 
 zero_valueY = find(gridy==0);
-if isempty(zero_valueY) 
+if isempty(zero_valueY)
     [~,zero_valueY] =min(abs(gridy)); % dirty fix for case where the grid does not include (0,0)
 end
 zero_valueZ = find(gridz==0);
-if isempty(zero_valueZ) 
+if isempty(zero_valueZ)
     [~,zero_valueZ] =min(abs(gridz));   % dirty fix for case where the grid does not include (0,0)
 end
 
@@ -486,9 +536,9 @@ Output.statistics                    = statisticsOut;
 Output.TS.fullWF.time                = fullslicesTime;
 Output.Pattern.Coord                 = [Y;Z];
 Output.Pattern.refplane              = ref_plane_dist; %like focus distance
-Output.Pattern.timestep_pat_vec      = timestep_pat_vec; 
-Output.Pattern.timeStep_Measurements = timeStep_Measurements; 
-Output.Pattern.distance_av_slice     = distance_av_slice; 
+Output.Pattern.timestep_pat_vec      = timestep_pat_vec;
+Output.Pattern.timeStep_Measurements = timeStep_Measurements;
+Output.Pattern.distance_av_slice     = distance_av_slice;
 Output.Pattern.points_av_slice       = points_av_slice;
 Output.Pattern.timestep_pat_vec      = timestep_pat_vec;
 Output.Pattern.name                  = input.PatternNames{curFileInfo.values{find(strcmp(curFileInfo.variables{1, 1},'Pat'))}};
