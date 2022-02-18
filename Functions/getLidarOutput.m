@@ -184,35 +184,58 @@ end
 % Look for the points along the beam trajectory
 
 focus_point_dis = sqrt(ref_plane_dist.^2+trajectory_forAng(1,:).^2+trajectory_forAng(2,:).^2);
-for ind_ang=1:length(angley)
-    dis_points(1,ind_ang) = distanceSlices/(cosd(angley(1,ind_ang))*cosd(anglez(1,ind_ang)));% distance of points along the trajectory within the probe length
-end
+for ind_dis=1:length(trajectory_forAng(1,:))
+    h(ind_dis)=sqrt(ref_plane_dist^2+trajectory_forAng(1,ind_dis)^2);
+    vec_xup=ref_plane_dist;
+    vec_xlow=vec_xup;
+    nn=1;
 
-ll = focus_point_dis;
-ul = ll;
-for ind_dist=1:length(focus_point_dis)
-    nn = 1;
-    while nn<points_av_slice+1
-        low_lim(nn)  = ll(1,ind_dist)-dis_points(1,ind_dist);
-        up_lim(nn)   = ul(1,ind_dist)+dis_points(1,ind_dist);
-        ll(ind_dist) = low_lim(nn);
-        ul(ind_dist) = up_lim(nn);
+    while nn<=points_av_slice
+        h_xlow(:,nn)=vec_xlow-distanceSlices;
+        vec_xlow=h_xlow(end);
+        
+        h_xup(:,nn)=vec_xup+distanceSlices;
+        vec_xup=h_xup(end);
+        
+%         vec_xlow=h_xup(end);
         nn=nn+1;
     end
-    points_probe = [sort(low_lim(1,:)),focus_point_dis(ind_dist),up_lim(1,:)];
-    c(ind_dist)            = sqrt(focus_point_dis(ind_dist)^2-trajectory_forAng(2,ind_dist)^2);
-    point_probez(ind_dist,:) = trajectory_forAng(2,ind_dist)*points_probe/focus_point_dis(ind_dist);
-    
-    for ind_sign=1:length(points_probe)
-        if points_probe(ind_sign)>0
-            c_prima(ind_dist,ind_sign) = sqrt(points_probe(ind_sign).^2-point_probez(ind_sign).^2);
-        elseif points_probe(ind_sign)<0
-            c_prima(ind_dist,ind_sign) = -sqrt(points_probe(ind_sign).^2-point_probez(ind_sign).^2);
-        end
-    end
-    point_probey(ind_dist,:) = trajectory_forAng(1,ind_dist).*c_prima(ind_dist,:)./c(ind_dist);
-    point_probex(ind_dist,:) = c_prima(ind_dist,:).*ref_plane_dist./c(ind_dist);
+    points_probeX(ind_dis,:)= [sort(h_xlow(1,:)),ref_plane_dist,h_xup(1,:)];
+    h_pp= h(ind_dis).*points_probeX(ind_dis,:)./ref_plane_dist;
+    points_probeY(ind_dis,:)=h_pp.*trajectory_forAng(1,ind_dis)./h(ind_dis);
+    points_probeZ(ind_dis,:)=h_pp.*trajectory_forAng(2,ind_dis)./h(ind_dis);
+    clear h_xlow h_xup
 end
+% 
+% for ind_ang=1:length(angley)
+%     dis_points(1,ind_ang) = distanceSlices/(cosd(angley(1,ind_ang))*cosd(anglez(1,ind_ang)));% distance of points along the trajectory within the probe length
+% end
+% 
+% ll = focus_point_dis;
+% ul = ll;
+% for ind_dist=1:length(focus_point_dis)
+%     nn = 1;
+%     while nn<points_av_slice+1
+%         low_lim(nn)  = ll(1,ind_dist)-dis_points(1,ind_dist);
+%         up_lim(nn)   = ul(1,ind_dist)+dis_points(1,ind_dist);
+%         ll(ind_dist) = low_lim(nn);
+%         ul(ind_dist) = up_lim(nn);
+%         nn=nn+1;
+%     end
+%     points_probe = [sort(low_lim(1,:)),focus_point_dis(ind_dist),up_lim(1,:)];
+%     h(ind_dist)            = sqrt(focus_point_dis(ind_dist)^2-trajectory_forAng(2,ind_dist)^2);
+%     point_probez(ind_dist,:) = trajectory_forAng(2,ind_dist)*points_probe/focus_point_dis(ind_dist);
+%     
+%     for ind_sign=1:length(points_probe)
+%         if points_probe(ind_sign)>0
+%             h_prima(ind_dist,ind_sign) = sqrt(points_probe(ind_sign).^2-point_probez(ind_sign).^2);
+%         elseif points_probe(ind_sign)<0
+%             h_prima(ind_dist,ind_sign) = -sqrt(points_probe(ind_sign).^2-point_probez(ind_sign).^2);
+%         end
+%     end
+%     point_probey(ind_dist,:) = trajectory_forAng(1,ind_dist).*h_prima(ind_dist,:)./h(ind_dist);
+%     point_probex(ind_dist,:) = h_prima(ind_dist,:).*ref_plane_dist./h(ind_dist);
+% end
 % for ind_point_probe=1:length(point_probey)
 %     %     interpolationmagical(ind_point_probe,:) =interpn(gridz,slicesDistance,gridy,compU,point_probez(ind_point_probe),point_probex(ind_point_probe),point_probey(ind_point_probe));
 %     interpolationmagical =interpn(gridz,slicesDistance,gridy,compU,point_probez,point_probex,point_probey);
@@ -254,7 +277,7 @@ for num_tr3 = 1:length (Y)
     LOS_points.slicesTime(num_tr3,:) = slicesTime(num_tr3,:);
         for iTraj2 = 1:size(plane_traj,2)
             LOS_points.Coor1{num_tr3}(:,iTraj2) = plane_traj{1,iTraj2}(:,num_tr3); %this variable saves coordinates according to trajectory points
-    LOS_points.Coor{num_tr3}=[point_probey(num_tr3,:);point_probez(num_tr3,:)];
+%             LOS_points.Coor{num_tr3}=[point_probex(num_tr3,:);point_probey(num_tr3,:);point_probez(num_tr3,:)];
     
         end
 end
