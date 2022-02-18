@@ -135,8 +135,8 @@ if strcmpi(input.interpolation_slices,'interpolate')
 
         % For the complete WF, insead of taking the closest, interpolate along time (x axis):
         for ind_s=1:size(LOS_points.Coor,2)
-            Y2=LOS_points.Coor{ind_s}(1,:);
-            Z2=LOS_points.Coor{ind_s}(2,:);
+            Y2=LOS_points.Coor{ind_s}(2,:);
+            Z2=LOS_points.Coor{ind_s}(3,:);
             Mid_Y2=Y2(floor(length(Y2)/2)+1); % find the point in the middle of the vector
             Mid_Z2=Z2(floor(length(Z2)/2)+1);
             VFinalTotal{ind_s} = interpn(gridz,slicesDistance,gridy,component,Mid_Z2,slicesDistance,Mid_Y2);
