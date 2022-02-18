@@ -9,7 +9,7 @@
 % University of Stuttgart, Stuttgart Wind Energy (SWE) 2019
 
 clc;
-close all;
+% close all;
 clearvars; 
 tmp = matlab.desktop.editor.getActive;
 cd(fileparts(tmp.Filename));
