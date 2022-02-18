@@ -9,48 +9,123 @@
 
 function [VFinalTotal,VFinalTotal_Time,Y1,Z1] = interpolationFun(input,component,LOS_points,gridy,gridz,distanceSlices,slicesDistance,focus_distances)
 if strcmpi(input.interpolation_slices,'interpolate')
+    %     for i1 = 1:size(LOS_points.slices,1) % loop over the points of pattern
+    %         Y1 = LOS_points.Coor{i1}(1,:);
+    %         Z1 = LOS_points.Coor{i1}(2,:);
+    %         for ind_slice=1:size(LOS_points.slices,2)
+    %             for iTSlice = 1:length(LOS_points.slicesAv) % For measured slices in the pattern
+    %                 indLoopT  =  (LOS_points.slices(i1,ind_slice)-1)*distanceSlices+(focus_distances(iTSlice)-input.ref_plane_dist);% [m] Distances where the measurements are focused  along the probe length
+    %                 indLoopT2 = indLoopT;
+    %                 indNEg = find(indLoopT<=0); % find negative, zeros or Nans
+    %                 indNEg =  [indNEg find(isnan(indLoopT))]; % find negative or Nans
+    %                 indNEg = [indNEg find(indLoopT>size(component,2)*distanceSlices)]; % findd points outside of the grid (we assume squared grid)
+    %                 indLoopT2(indNEg) = [];
+    %                 maxLoopInd = round(length(indLoopT)/2); % find the middle of the total slices
+    %                 NansStart  = length(find(indNEg<maxLoopInd));
+    %                 NansEnd    = length(indNEg)-NansStart;
+    %                 indLoopT2=[nan(1,NansStart) indLoopT2 nan(1,NansEnd) ];                     %#ok<*AGROW>
+    %                 % Query points for interpolation:
+    %                 xq1 = LOS_points.Coor{i1}(1,iTSlice);
+    %                 xq2 = LOS_points.Coor{i1}(2,iTSlice);
+    %                 xq3 = indLoopT2;
+    %                 % Interpolation
+    %                 VFinalTotal_TimeInt2{i1}(iTSlice,ind_slice)=interpn(gridz,slicesDistance,gridy,component,xq2,xq3,xq1);
+    %             end
+    %         end
+    %         if length(LOS_points.slicesAv) ~= 1
+    %             VFinalTotal_TimeInt3=VFinalTotal_TimeInt2{i1};
+    %             VFinalTotal_Time{i1} = weighting_fun(input,LOS_points,VFinalTotal_TimeInt3,distanceSlices);
+    %         else
+    %             VFinalTotal_Time{i1} = VFinalTotal_TimeInt2;
+    %         end
+    %     end
+    %     % For the complete WF, insead of taking the closest, interpolate along time (x axis):
+    %     for ind_s=1:size(LOS_points.Coor,2)
+    %         Y2=LOS_points.Coor{ind_s}(1,:);
+    %         Z2=LOS_points.Coor{ind_s}(2,:);
+    %         Mid_Y2=Y2(floor(length(Y2)/2)+1); % find the point in the middle of the vector
+    %         Mid_Z2=Z2(floor(length(Z2)/2)+1);
+    %         VFinalTotal{ind_s} = interpn(gridz,slicesDistance,gridy,component,Mid_Z2,slicesDistance,Mid_Y2);
+    %     end
     for i1 = 1:size(LOS_points.slices,1) % loop over the points of pattern
-        Y1 = LOS_points.Coor{i1}(1,:);
-        Z1 = LOS_points.Coor{i1}(2,:);
-        for ind_slice=1:size(LOS_points.slices,2)
-            for iTSlice = 1:length(LOS_points.slicesAv) % For measured slices in the pattern
-                indLoopT  =  (LOS_points.slices(i1,ind_slice)-1)*distanceSlices+(focus_distances(iTSlice)-input.ref_plane_dist);% [m] Distances where the measurements are focused  along the probe length
-                indLoopT2 = indLoopT;
-                indNEg = find(indLoopT<=0); % find negative, zeros or Nans
-                indNEg =  [indNEg find(isnan(indLoopT))]; % find negative or Nans
-                indNEg = [indNEg find(indLoopT>size(component,2)*distanceSlices)]; % findd points outside of the grid (we assume squared grid)
-                indLoopT2(indNEg) = [];
-                maxLoopInd = round(length(indLoopT)/2); % find the middle of the total slices
-                NansStart  = length(find(indNEg<maxLoopInd));
-                NansEnd    = length(indNEg)-NansStart;
-                indLoopT2=[nan(1,NansStart) indLoopT2 nan(1,NansEnd) ];                     %#ok<*AGROW>
-                % Query points for interpolation:
-                xq1 = LOS_points.Coor{i1}(1,iTSlice);
-                xq2 = LOS_points.Coor{i1}(2,iTSlice);
-                xq3 = indLoopT2;
-                % Interpolation
-                VFinalTotal_TimeInt2{i1}(iTSlice,ind_slice)=interpn(gridz,slicesDistance,gridy,component,xq2,xq3,xq1);
+        X1 = LOS_points.Coor{i1}(1,:);
+        Y1 = LOS_points.Coor{i1}(2,:);
+        Z1 = LOS_points.Coor{i1}(3,:);
+        Y1 = round(Y1,5); % Round because if not, the interpolation gives NaN's or incorrect results
+        Z1 = round(Z1,5);
+        X1 = round(X1,5);
+        busquedaY = find(ismember(gridy,Y1) ); % look for coincidences in Y component
+        busquedaZ = find(ismember(gridz,Z1)); %#ok<*EFIND> % look for coincidences in  Z component
+        if isempty (busquedaY) || length(busquedaY) <(length(LOS_points.slicesAv)) %check if all measured points are grid points
+            for i = 1:length(Y1)    % find the closest points in the grid and use these
+                
+                DifX = slicesDistance-X1(i);
+                [~,indFX] = min(abs(DifX));
+                PointFm{i1}(1,i) = slicesDistance(indFX);
+                PoinInd{i1}(1,i) = indFX;
+                DifX(indFX)=nan;
+                [~,indFX] = min(abs(DifX));
+                PointFm{i1}(2,i) = slicesDistance(indFX);
+                PoinInd{i1}(2,i) = indFX;
+                
+                DifY = gridy-Y1(i);
+                [~,indFY] = min(abs(DifY));
+                PointFm{i1}(3,i) = gridy(indFY);
+                PoinInd{i1}(3,i) = indFY;
+                DifY(indFY)=nan;
+                [~,indFY] = min(abs(DifY));
+                PointFm{i1}(4,i) = gridy(indFY);
+                PoinInd{i1}(4,i) = indFY;
+                
+                
+                DifZ = gridz-Z1(i);
+                [~,indFZ] = min(abs(DifZ));
+                PointFm{i1}(5,i) = gridz(indFZ);
+                PoinInd{i1}(5,i) = indFZ;
+                DifZ(indFZ)=nan;
+                [~,indFZ] = min(abs(DifZ));
+                PointFm{i1}(6,i) = gridz(indFZ);
+                PoinInd{i1}(6,i) = indFZ;
+                interp_pointsy = PoinInd{i1}(1:2,1);
+                interp_pointsz = PoinInd{i1}(3:4,1);
+                for ind_pointsy=1:length(interp_pointsy)
+                    for ind_pointsz=1:length(interp_pointsy)
+                        vel2int(ind_pointsy,ind_pointsz)=component(interp_pointsz(ind_pointsz),1,interp_pointsy(ind_pointsy));
+                    end
+                end
+                %                 for ind_vel= 1:length(3)
+                %                     vel=component(3);
+                %                 end
             end
-        end
-        if length(LOS_points.slicesAv) ~= 1
-            VFinalTotal_TimeInt3=VFinalTotal_TimeInt2{i1};
-            VFinalTotal_Time{i1} = weighting_fun(input,LOS_points,VFinalTotal_TimeInt3,distanceSlices);
         else
-            VFinalTotal_Time{i1} = VFinalTotal_TimeInt2;
+            PointFm{i1}(1,:) = gridy(busquedaY);
+            PoinInd{i1}(1,:) = busquedaY;
+            PointFm{i1}(2,:) = gridy(busquedaY);
+            PoinInd{i1}(2,:) = busquedaY;
         end
-    end
-    % For the complete WF, insead of taking the closest, interpolate along time (x axis):
-    for ind_s=1:size(LOS_points.Coor,2)
-        Y2=LOS_points.Coor{ind_s}(1,:);
-        Z2=LOS_points.Coor{ind_s}(2,:);
-        Mid_Y2=Y2(floor(length(Y2)/2)+1); % find the point in the middle of the vector
-        Mid_Z2=Z2(floor(length(Z2)/2)+1);
-        VFinalTotal{ind_s} = interpn(gridz,slicesDistance,gridy,component,Mid_Z2,slicesDistance,Mid_Y2);
+        if isempty (busquedaZ) || length(busquedaZ) <(length(LOS_points.slicesAv)) %check if all measured points are grid points
+            for i = 1:length(Y1)
+                DifZ = gridz-Z1(i);
+                [~,indF] = min(abs(DifZ));
+                PointFm{i1}(3,i) = gridz(indF);
+                PoinInd{i1}(3,i) = indF;
+                DifZ(indF)=nan;
+                [~,indF] = min(abs(DifZ));
+                PointFm{i1}(4,i) = gridz(indF);
+                PoinInd{i1}(4,i) = indF;
+            end
+        else
+            PointFm{i1}(3,:) = gridz(busquedaZ); % points in the grid in meters matching our points (nearest, not exactly the value of the trajectory!!!)
+            PoinInd{i1}(3,:) = busquedaZ; %indices of point matching in the grid
+            PointFm{i1}(4,:) = gridz(busquedaZ); % points in the grid in meters matching our points (nearest, not exactly the value of the trajectory!!!)
+            PoinInd{i1}(4,:) = busquedaZ; %indices of point matching in the grid
+            
+        end
     end
 elseif strcmpi(input.interpolation_slices,'none') %if you don't interpolate get the closest point
     for i1 = 1:size(LOS_points.slices,1) % loop over the points of pattern
-        Y1 = LOS_points.Coor{i1}(1,:);
-        Z1 = LOS_points.Coor{i1}(2,:);
+        Y1 = LOS_points.Coor{i1}(2,:);
+        Z1 = LOS_points.Coor{i1}(3,:);
         Y1 = round(Y1,5); % Round because if not, the interpolation gives NaN's or incorrect results
         Z1 = round(Z1,5);
         busquedaY = find(ismember(gridy,Y1) ); % look for coincidences in Y component
