@@ -24,16 +24,16 @@ elseif strcmpi(input.flag_probe_weighting,"cw")
         interval_of_confidence = input.distance_av_space;
         distan     = linspace(-interval_of_confidence,interval_of_confidence,size(VFinalTotal_TimeInt3,1));
         %Remove Nans
-        VFinalTotal_TimeInt3_NoNans = isnan(VFinalTotal_TimeInt3); %finding nans
+        VFinalTotal_TimeInt3_NoNans = VFinalTotal_TimeInt3(~isnan(VFinalTotal_TimeInt3)); %finding nans
         
         % Gaussian Weighting function
         CW_WeightFun = (1/pi)*((input.distance_av_space/input.truncation_val)./((input.distance_av_space/input.truncation_val)^2+(distan.^2)));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
-        
+        CW_WeightFun_NoNans  = CW_WeightFun(~isnan(VFinalTotal_TimeInt3));
         % Check that sum of probabilities is ~ 0.76 (FWHM)
         Sum_probabilities_CW = sum((distan(2)-distan(1))*CW_WeightFun); %#ok<*NASGU>
         % Performing weighted mean
-        CW_WeightFun(VFinalTotal_TimeInt3_NoNans) = nan;
-        VFinalTotal_Time(:,ind_points) = V_spec(input,VFinalTotal_TimeInt3_NoNans,CW_WeightFun,distan); %#ok<*AGROW>
+%         CW_WeightFun(VFinalTotal_TimeInt3_NoNans) = nan;
+        VFinalTotal_Time(:,ind_points) = V_spec(input,VFinalTotal_TimeInt3_NoNans,CW_WeightFun_NoNans,distan); %#ok<*AGROW>
 %         VFinalTotal_Time(:,ind_points) = sum(CW_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(CW_WeightFun,'omitnan'); %#ok<*AGROW>
     end
 elseif strcmpi(input.flag_probe_weighting,"pulsed")
