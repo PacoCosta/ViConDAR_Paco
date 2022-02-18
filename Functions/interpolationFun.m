@@ -7,7 +7,7 @@
 % University of Stuttgart, Stuttgart Wind Energy (SWE) 2019
 %--------------------------------------------------------------------------
 
-function [VFinalTotal,VFinalTotal_Time,Y1,Z1] = interpolationFun(input,component,LOS_points,gridy,gridz,distanceSlices,slicesDistance,focus_distances)
+function [VFinalTotal,VFinalTotal_Time,Y1,Z1] = interpolationFun(input,component,LOS_points,gridy,gridz,distanceSlices,slicesDistance,focus_distances,points_probeX)
 if strcmpi(input.interpolation_slices,'interpolate')
     %     for i1 = 1:size(LOS_points.slices,1) % loop over the points of pattern
     %         Y1 = LOS_points.Coor{i1}(1,:);
@@ -54,9 +54,15 @@ if strcmpi(input.interpolation_slices,'interpolate')
         Y1 = round(Y1,5); % Round because if not, the interpolation gives NaN's or incorrect results
         Z1 = round(Z1,5);
         X1 = round(X1,5);
+        [~,zeros_X_ind]= find(X1<0);
+        X1(zeros_X_ind)=[];
+        Y1(zeros_X_ind)=[];
+        Z1(zeros_X_ind)=[];
+        busquedaX = find(ismember(slicesDistance,X1) ); % look for coincidences in X component
         busquedaY = find(ismember(gridy,Y1) ); % look for coincidences in Y component
         busquedaZ = find(ismember(gridz,Z1)); %#ok<*EFIND> % look for coincidences in  Z component
-        if isempty (busquedaY) || length(busquedaY) <(length(LOS_points.slicesAv)) %check if all measured points are grid points
+        
+        if isempty (busquedaX) || length(busquedaX) <(length(LOS_points.slicesAv)) %check if all measured points are grid points
             for i = 1:length(Y1)    % find the closest points in the grid and use these
                 
                 DifX = slicesDistance-X1(i);
@@ -68,6 +74,17 @@ if strcmpi(input.interpolation_slices,'interpolate')
                 PointFm{i1}(2,i) = slicesDistance(indFX);
                 PoinInd{i1}(2,i) = indFX;
                 
+            end
+        else
+            PointFm{i1}(1,:) = gridy(busquedaX);
+            PoinInd{i1}(1,:) = busquedaX;
+            PointFm{i1}(2,:) = gridy(busquedaX);
+            PoinInd{i1}(2,:) = busquedaX;
+        end
+        
+        if isempty (busquedaY) || length(busquedaY) <(length(LOS_points.slicesAv)) %check if all measured points are grid points
+            for i = 1:length(Y1)    % find the closest points in the grid and use these
+                
                 DifY = gridy-Y1(i);
                 [~,indFY] = min(abs(DifY));
                 PointFm{i1}(3,i) = gridy(indFY);
@@ -76,51 +93,63 @@ if strcmpi(input.interpolation_slices,'interpolate')
                 [~,indFY] = min(abs(DifY));
                 PointFm{i1}(4,i) = gridy(indFY);
                 PoinInd{i1}(4,i) = indFY;
-                
-                
-                DifZ = gridz-Z1(i);
-                [~,indFZ] = min(abs(DifZ));
-                PointFm{i1}(5,i) = gridz(indFZ);
-                PoinInd{i1}(5,i) = indFZ;
-                DifZ(indFZ)=nan;
-                [~,indFZ] = min(abs(DifZ));
-                PointFm{i1}(6,i) = gridz(indFZ);
-                PoinInd{i1}(6,i) = indFZ;
-                interp_pointsy = PoinInd{i1}(1:2,1);
-                interp_pointsz = PoinInd{i1}(3:4,1);
-                for ind_pointsy=1:length(interp_pointsy)
-                    for ind_pointsz=1:length(interp_pointsy)
-                        vel2int(ind_pointsy,ind_pointsz)=component(interp_pointsz(ind_pointsz),1,interp_pointsy(ind_pointsy));
-                    end
-                end
-                %                 for ind_vel= 1:length(3)
-                %                     vel=component(3);
-                %                 end
             end
         else
-            PointFm{i1}(1,:) = gridy(busquedaY);
-            PoinInd{i1}(1,:) = busquedaY;
-            PointFm{i1}(2,:) = gridy(busquedaY);
-            PoinInd{i1}(2,:) = busquedaY;
+            PointFm{i1}(3,:) = gridy(busquedaY);
+            PoinInd{i1}(3,:) = busquedaY;
+            PointFm{i1}(4,:) = gridy(busquedaY);
+            PoinInd{i1}(4,:) = busquedaY;
         end
         if isempty (busquedaZ) || length(busquedaZ) <(length(LOS_points.slicesAv)) %check if all measured points are grid points
             for i = 1:length(Y1)
                 DifZ = gridz-Z1(i);
                 [~,indF] = min(abs(DifZ));
-                PointFm{i1}(3,i) = gridz(indF);
-                PoinInd{i1}(3,i) = indF;
+                PointFm{i1}(5,i) = gridz(indF);
+                PoinInd{i1}(5,i) = indF;
                 DifZ(indF)=nan;
                 [~,indF] = min(abs(DifZ));
-                PointFm{i1}(4,i) = gridz(indF);
-                PoinInd{i1}(4,i) = indF;
+                PointFm{i1}(6,i) = gridz(indF);
+                PoinInd{i1}(6,i) = indF;
             end
         else
-            PointFm{i1}(3,:) = gridz(busquedaZ); % points in the grid in meters matching our points (nearest, not exactly the value of the trajectory!!!)
-            PoinInd{i1}(3,:) = busquedaZ; %indices of point matching in the grid
-            PointFm{i1}(4,:) = gridz(busquedaZ); % points in the grid in meters matching our points (nearest, not exactly the value of the trajectory!!!)
-            PoinInd{i1}(4,:) = busquedaZ; %indices of point matching in the grid
+            PointFm{i1}(5,:) = gridz(busquedaZ); % points in the grid in meters matching our points (nearest, not exactly the value of the trajectory!!!)
+            PoinInd{i1}(5,:) = busquedaZ; %indices of point matching in the grid
+            PointFm{i1}(6,:) = gridz(busquedaZ); % points in the grid in meters matching our points (nearest, not exactly the value of the trajectory!!!)
+            PoinInd{i1}(6,:) = busquedaZ; %indices of point matching in the grid
             
         end
+        for ind_col=1:size(PointFm{i1},2)
+            points2interp_ind{ind_col}  = combvec(PoinInd{i1}(1:2,ind_col)',PoinInd{i1}(3:4,ind_col)',PoinInd{i1}(5:6,ind_col)');
+            points2interp_val {ind_col} = combvec(PointFm{i1}(1:2,ind_col)',PointFm{i1}(3:4,ind_col)',PointFm{i1}(5:6,ind_col)');
+            
+            for i_iint=1:size(points2interp_val{ind_col},2)
+                v_points2interp{ind_col}(:,i_iint) = component(points2interp_ind{ind_col}(3,i_iint),points2interp_ind{ind_col}(1,i_iint),points2interp_ind{ind_col}(2,i_iint));
+            end
+            resh_vel_val{ind_col} = reshape(v_points2interp{ind_col},2,2,2);
+            int_gridx{ind_col}    = unique(points2interp_val{ind_col}(1,:));
+            int_gridy{ind_col}    = unique(points2interp_val{ind_col}(2,:));
+            int_gridz{ind_col}    = unique(points2interp_val{ind_col}(3,:));
+            
+            VFinalTotal_Time{i1}(:,ind_col)=interpn(int_gridz{ind_col},int_gridx{ind_col},int_gridy{ind_col},resh_vel_val{ind_col},Z1(ind_col),X1(ind_col),Y1(ind_col));
+        end
+
+        % For the complete WF, insead of taking the closest, interpolate along time (x axis):
+        for ind_s=1:size(LOS_points.Coor,2)
+            Y2=LOS_points.Coor{ind_s}(1,:);
+            Z2=LOS_points.Coor{ind_s}(2,:);
+            Mid_Y2=Y2(floor(length(Y2)/2)+1); % find the point in the middle of the vector
+            Mid_Z2=Z2(floor(length(Z2)/2)+1);
+            VFinalTotal{ind_s} = interpn(gridz,slicesDistance,gridy,component,Mid_Z2,slicesDistance,Mid_Y2);
+        end
+        
+        
+        int_gridx2=[0,1];
+        int_gridy2=[0,1];
+        int_gridz2=[0,1];
+        C=reshape([0,1,2,3,4,5,6,7],2,2,2);
+        
+        V_final2=interpn(int_gridx2,int_gridy2,int_gridz2,C,1,1,1);
+        
     end
 elseif strcmpi(input.interpolation_slices,'none') %if you don't interpolate get the closest point
     for i1 = 1:size(LOS_points.slices,1) % loop over the points of pattern
