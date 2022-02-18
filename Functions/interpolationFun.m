@@ -34,7 +34,7 @@ if strcmpi(input.interpolation_slices,'interpolate')
         end
         if length(LOS_points.slicesAv) ~= 1
             VFinalTotal_TimeInt3=VFinalTotal_TimeInt2{i1};
-            VFinalTotal_Time{i1} = Testing_WeightingFun_V2(input,LOS_points,VFinalTotal_TimeInt3,distanceSlices);
+            VFinalTotal_Time{i1} = weighting_fun(input,LOS_points,VFinalTotal_TimeInt3,distanceSlices);
         else
             VFinalTotal_Time{i1} = VFinalTotal_TimeInt2;
         end
