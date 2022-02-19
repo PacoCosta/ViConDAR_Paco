@@ -12,6 +12,7 @@ function VFinalTotal_Time = weighting_fun(input,VFinalTotal_TimeInt2)
 if strcmpi(input.flag_probe_weighting,"mean")
     VFinalTotal_Time = mean(VFinalTotal_TimeInt2,'omitnan');
 elseif strcmpi(input.flag_probe_weighting,"cw")
+    
     % For a given fwhm (FWHM = 2*Rayleigh length) we calculate the normal distribution:
     % FWHM  = 2*input.distance_av_space;
     % By definition sigma and fwhm are simply related as follows:
@@ -27,7 +28,12 @@ elseif strcmpi(input.flag_probe_weighting,"cw")
         VFinalTotal_TimeInt3_NoNans = VFinalTotal_TimeInt3(~isnan(VFinalTotal_TimeInt3)); %finding nans
         
         % Gaussian Weighting function
+        
         CW_WeightFun = (1/pi)*((input.distance_av_space/input.truncation_val)./((input.distance_av_space/input.truncation_val)^2+(distan.^2)));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
+        CW_WeightFun2 = 1./(((input.distance_av_space/input.truncation_val)^2)*(1-(distan./(input.distance_av_space/input.truncation_val))).^2+(distan.^2));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
+        
+        FWHM_CW = fwhm(distan,CW_WeightFun);
+FWHM_CW2 = fwhm(distan,CW_WeightFun2);
         CW_WeightFun_NoNans  = CW_WeightFun(~isnan(VFinalTotal_TimeInt3));
         % Check that sum of probabilities is ~ 0.76 (FWHM)
         Sum_probabilities_CW = sum((distan(2)-distan(1))*CW_WeightFun); %#ok<*NASGU>
