@@ -143,12 +143,12 @@ if strcmpi(input.interpolation_slices,'interpolate')
         end
         
         
-        int_gridx2=[0,1];
-        int_gridy2=[0,1];
-        int_gridz2=[0,1];
-        C=reshape([0,1,2,3,4,5,6,7],2,2,2);
-        
-        V_final2=interpn(int_gridx2,int_gridy2,int_gridz2,C,1,1,1);
+%         int_gridx2=[0,1];
+%         int_gridy2=[0,1];
+%         int_gridz2=[0,1];
+%         C=reshape([0,1,2,3,4,5,6,7],2,2,2);
+%         
+%         V_final2=interpn(int_gridx2,int_gridy2,int_gridz2,C,1,1,1);
         
     end
 elseif strcmpi(input.interpolation_slices,'none') %if you don't interpolate get the closest point
