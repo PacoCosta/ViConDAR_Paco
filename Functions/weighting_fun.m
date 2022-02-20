@@ -30,10 +30,10 @@ elseif strcmpi(input.flag_probe_weighting,"cw")
         % Gaussian Weighting function
         
         CW_WeightFun = (1/pi)*((input.distance_av_space/input.truncation_val)./((input.distance_av_space/input.truncation_val)^2+(distan.^2)));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
-        CW_WeightFun2 = 1./(((input.distance_av_space/input.truncation_val)^2)*(1-(distan./(input.distance_av_space/input.truncation_val))).^2+(distan.^2));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
+%         CW_WeightFun2 = 1./(((input.distance_av_space/input.truncation_val)^2)*(1-(distan./(input.distance_av_space/input.truncation_val))).^2+(distan.^2));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
         
-        FWHM_CW = fwhm(distan,CW_WeightFun);
-FWHM_CW2 = fwhm(distan,CW_WeightFun2);
+%         FWHM_CW = fwhm(distan,CW_WeightFun);
+% FWHM_CW2 = fwhm(distan,CW_WeightFun2);
         CW_WeightFun_NoNans  = CW_WeightFun(~isnan(VFinalTotal_TimeInt3));
         % Check that sum of probabilities is ~ 0.76 (FWHM)
         Sum_probabilities_CW = sum((distan(2)-distan(1))*CW_WeightFun); %#ok<*NASGU>
