@@ -54,7 +54,7 @@ elseif strcmpi(input.flag_probe_weighting,"pulsed")
         Pulsed_WeightFun_NoNans  = Pulsed_WeightFun(~isnan(VFinalTotal_TimeInt3));
         %         cc=cumsum(Pulsed_WeightFun)
         %         VFinalTotal_Time (:,ind_points)        = sum(Pulsed_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(Pulsed_WeightFun,'omitnan'); %#ok<*AGROW>
-        FWHM_Pulsed= fwhm(distan,Pulsed_WeightFun);
+%         FWHM_Pulsed= fwhm(distan,Pulsed_WeightFun);
         % Velocity spectra and peak detection methods
         VFinalTotal_Time (:,ind_points) = V_spec(input,VFinalTotal_TimeInt3_NoNans,Pulsed_WeightFun_NoNans,distan);
         
