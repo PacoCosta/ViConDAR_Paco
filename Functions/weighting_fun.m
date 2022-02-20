@@ -29,9 +29,7 @@ elseif strcmpi(input.flag_probe_weighting,"cw")
         
         % Gaussian Weighting function
         
-        CW_WeightFun = (1/pi)*((input.distance_av_space/input.truncation_val)./((input.distance_av_space/input.truncation_val)^2+(distan.^2)));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
-%         CW_WeightFun2 = 1./(((input.distance_av_space/input.truncation_val)^2)*(1-(distan./(input.distance_av_space/input.truncation_val))).^2+(distan.^2));%(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);
-        
+        CW_WeightFun = (1/pi)*((input.distance_av_space/input.truncation_val)./((input.distance_av_space/input.truncation_val)^2+((distan).^2)));%cc=(1/(sigma*sqrt(2*pi)))*exp(-0.5*((distan)/sigma).^2);        
 %         FWHM_CW = fwhm(distan,CW_WeightFun);
 % FWHM_CW2 = fwhm(distan,CW_WeightFun2);
         CW_WeightFun_NoNans  = CW_WeightFun(~isnan(VFinalTotal_TimeInt3));
@@ -56,7 +54,7 @@ elseif strcmpi(input.flag_probe_weighting,"pulsed")
         Pulsed_WeightFun_NoNans  = Pulsed_WeightFun(~isnan(VFinalTotal_TimeInt3));
         %         cc=cumsum(Pulsed_WeightFun)
         %         VFinalTotal_Time (:,ind_points)        = sum(Pulsed_WeightFun'.*VFinalTotal_TimeInt3,'omitnan')/sum(Pulsed_WeightFun,'omitnan'); %#ok<*AGROW>
-        
+        FWHM_Pulsed= fwhm(distan,Pulsed_WeightFun);
         % Velocity spectra and peak detection methods
         VFinalTotal_Time (:,ind_points) = V_spec(input,VFinalTotal_TimeInt3_NoNans,Pulsed_WeightFun_NoNans,distan);
         
