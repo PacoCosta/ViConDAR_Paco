@@ -190,7 +190,7 @@ for ifDist = 1:length(focus_distances)
             plane_traj{ifDist}(2,iTraj) = iplane*tand(anglez(iTraj));
         else   %dont move the trajectory projection if you dont have LOS
             plane_traj{ifDist}(1,iTraj) = Y(iTraj);
-            plane_traj{ifDist}(2,iTraj) = Z(iTraj); % this variable saves Y aand z points according to the plane
+            plane_traj{ifDist}(2,iTraj) = Z(iTraj); % this variable saves Y and z points according to the plane
         end
     end
 end
