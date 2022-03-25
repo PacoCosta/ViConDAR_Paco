@@ -14,16 +14,16 @@ Qlunda_TI_directory = '..\Qlundar_TI\';
 save_dir            = '..\Output_Qlundar_TI\';
 nameBase            = 'Qlundar';
 % Introduce wf inputs (base on the name of the wf stored in '..\Qlundar_TI\')
-Zr = [120,150,180,210,240,270,300]; % user puts here the number distance appearing in the name ('Dav'=Zr*TruncationDistance)
-Pattern_name        = '1P_Single';
+Zr = [120];%[120,150,180,210,240,270,300]; % user puts here the number distance appearing in the name ('Dav'=Zr*TruncationDistance)
+Pattern_name        = 'RHI';
 Sufix               = '_TIout';
 V                   = '15';
-FD                  = '250';
+FD                  = '150';
 Sh                  ='143';
 SD                  = '01';
-TI                  = [2,6,10,14,18,22,26,30];
-Tp                  = [0.1,1,10];
-distance_av         = [10,12.5,15,17.5,20,22.5,25]; 
+TI                  = [2,30];%[2,6,10,14,18,22,26,30];
+Tp                  = [1];%[0.1,1,10];
+distance_av         = [10];%[10,12.5,15,17.5,20,22.5,25]; 
 ColorSet            = varycolor(size(TI,2));
 ind2=1;
 for i_Tp = Tp
@@ -34,7 +34,7 @@ for i_Tp = Tp
     end
     i_Tp = strrep(i_Tp,'.','d');
     ind0=1;
-    indColor=1;
+    
     for i_TI=TI
         i_TI = num2str(i_TI); %#ok<*FXSET>
         if size(i_TI,2)<2
@@ -62,31 +62,36 @@ for i_Tp = Tp
     end
     %     ind2=ind2+1;
     % Plotting
-    figure,hold on
-    for i = [1:size( Output_TI_Qlundar.TI_lidar_U,2)]
-        plot1=plot(distance_av,Output_TI_Qlundar.TI_error_U{i},'-','color', ColorSet(indColor,:));
-        title ([char(949),'(TI) and RMSE(u)' , ' (Tp = ' num2str(Tp(ind2)),'s)']);
-        grid on
+    figure,hold on,grid on
+    indColor=1;
+    for i = 1:size( Output_TI_Qlundar.TI_lidar_U,2)
+        plot(distance_av,Output_TI_Qlundar.TI_error_U{i},'o','color', ColorSet(indColor,:));
+        title ([char(949),'(TI)' , ' (Tp = ' num2str(Tp(ind2)),'s)']);
+        
         set(gca,'Fontsize',19)
-%         legend (legCell,'Interpreter','None','FontSize',10)
         xlabel('Rayleigh distance [m]')
-        
-        yyaxis right
-        ylabel('[-]')
-        
-        plot2=plot(distance_av,Output_TI_Qlundar.RMSE_mean_U{i},'--','color', ColorSet(indColor,:));
-%         legend (legCell2,'Interpreter','None','FontSize',10)
-        
-        yyaxis left
         ylabel('[%]')
         indColor=indColor+1;
     end
+    legend(legCell,'Fontsize',10)
     
-    legend([legCell,legCell2],'Fontsize',10)
+    % Plotting RMSE velocity
+    figure, hold on,grid on   
+    indColor=1;
+    for i = 1:size( Output_TI_Qlundar.TI_lidar_U,2)         
+        plot(distance_av,Output_TI_Qlundar.RMSE_mean_U{i},'o','color', ColorSet(indColor,:));       
+        set(gca,'Fontsize',19)
+        title (['RMSE(u)' , ' (Tp = ' num2str(Tp(ind2)),'s)']);
+        ylabel('[m/s]')
+        xlabel('Rayleigh distance [m]')
+        indColor=indColor+1;
+        legend()
+    end
+    legend(legCell2,'Fontsize',10)
    
     %contours
     % Performing matrices for the contours
-    for ind_cont=1:8
+    for ind_cont=1:size(TI,1)
         matCont_RMSE{ind2}(ind_cont,:)=Output_TI_Qlundar.RMSE_mean_U{ind_cont};
         mat_Cont_errTI{ind2}(ind_cont,:)=Output_TI_Qlundar.TI_error_U{ind_cont};
     end
@@ -97,7 +102,7 @@ for i_Tp = Tp
     figure, contourf(distance_av,TI,matCont_RMSE{ind2});
     title(['RMSE (U) - Tp = ' num2str(Tp(ind2) )])
     c0=colorbar;
-    c0.Label.String = 'RMSE [-]';
+    c0.Label.String = 'RMSE [m/s]';
     xlabel('Rayleigh distance [m]')
     ylabel('TI[%]')
     set(gca,'BoxStyle','full','CLim',CLimits_RMSE,'Layer','top','Fontsize',19);
