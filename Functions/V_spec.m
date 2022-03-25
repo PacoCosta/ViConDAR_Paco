@@ -32,8 +32,11 @@ function VFinalTotal_Time = V_spec(input,VFinalTotal_TimeInt3,WeightFun,distan)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 binwidth=.1;
 i_bin=1;
-
-floorS1 = floorS(min(VFinalTotal_TimeInt3),2); % floor the lower limit with specific decimal, here 3 decimals
+if min(VFinalTotal_TimeInt3)~=0 % this if because when min(VFinalTotal_TimeInt3)==0 floorS1 gives nans
+    floorS1 = floorS(min(VFinalTotal_TimeInt3),2); % floor the lower limit with specific decimal, here 3 decimals
+elseif min(VFinalTotal_TimeInt3)==0
+    floorS1=0;
+end
 ceilS1  = ceilS(max(VFinalTotal_TimeInt3),2);% ceil the upper limit with specific decimal, here 3 decimals
 binrang = floorS1:binwidth:ceilS1;
 t = binrang +binwidth;
@@ -78,16 +81,16 @@ for ind_peak_method=1:size(input.peak_detection_method,2)
     elseif strcmpi (input.peak_detection_method{ind_peak_method},"centroid")
         %Centroid
         VFinalTotal_Time = sum(SumSpectrum.*binrang)/sum(SumSpectrum);
-%         fn_DF            = fnplt(DF, 'g', 2);        
-%         new_binranag=linspace(min(binrang),max(binrang),length(fn_DF));
-                
-%         VFinalTotal_Time = sum(fn_DF(2,:).*new_binranag)/sum(fn_DF(2,:));
-
-%         fn_DF            = fnplt(DF, 'g', 2);
-%         VFinalTotal_Time = spectralCentroid(fn_DF(2,:));
-%         VFinalTotal_Time = sum(fn_DF(2,:).*vv*binwidth)/sum(fn_DF(2,:)*binwidth);
+        %         fn_DF            = fnplt(DF, 'g', 2);
+        %         new_binranag=linspace(min(binrang),max(binrang),length(fn_DF));
+        
+        %         VFinalTotal_Time = sum(fn_DF(2,:).*new_binranag)/sum(fn_DF(2,:));
+        
+        %         fn_DF            = fnplt(DF, 'g', 2);
+        %         VFinalTotal_Time = spectralCentroid(fn_DF(2,:));
+        %         VFinalTotal_Time = sum(fn_DF(2,:).*vv*binwidth)/sum(fn_DF(2,:)*binwidth);
     elseif strcmpi(input.peak_detection_method{ind_peak_method},"mean")
-        %Mean: Computes the mean of the values whithin the probe volume        
+        %Mean: Computes the mean of the values whithin the probe volume
         VFinalTotal_Time = sum(WeightFun'.*VFinalTotal_TimeInt3)/sum(WeightFun); %#ok<*AGROW>
     end
 end
@@ -96,8 +99,8 @@ end
 
 
 
-% 
-% 
+%
+%
 % figure, bar(binrang,SumSpectrum,'hist')
 % hold on
 % fnplt(DF, 'r', 2)
