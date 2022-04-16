@@ -50,9 +50,9 @@ for ind_pattern = 1: length(input.PatternNames)
         end
     end
     % mean of windfiled characteristics from different seeds of the same wind field
-    TI_mean_lidar_U = mean (TI_DATA_lidar_U);
-    TI_mean_WF_U    = mean (TI_DATA_fullWF_U);
-    RMSE_mean_U     = mean (RMSE_U);
+    TI_mean_lidar_U = mean (TI_DATA_lidar_U,1);
+    TI_mean_WF_U    = mean (TI_DATA_fullWF_U,1);
+    RMSE_mean_U     = mean (RMSE_U,1);
     for ind_err = 1:size(TI_mean_WF_U,2)
         error_U (1,ind_err) = 100*(abs(TI_mean_lidar_U(1,ind_err)-TI_mean_WF_U(1,ind_err))/TI_mean_WF_U(1,ind_err)); % error [%]
     end 
