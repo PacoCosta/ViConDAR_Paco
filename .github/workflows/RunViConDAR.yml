@@ -26,5 +26,6 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Run python script
-        run: python Main/ViConDAR.m
+        working-directory: ./Main
+        run: python ViConDAR.m
 
