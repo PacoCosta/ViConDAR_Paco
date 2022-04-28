@@ -7,7 +7,7 @@
 % University of Stuttgart, Stuttgart Wind Energy (SWE) 2019
 %--------------------------------------------------------------------------
 
-function [VFinalTotal,VFinalTotal_Time,Y1,Z1] = interpolationFun(input,component,LOS_points,gridy,gridz,distanceSlices,slicesDistance,focus_distances)
+function [VFinalTotal,VFinalTotal_Time,Y1,Z1] = interpolationFun(input,component,LOS_points,gridy,gridz,distanceSlices,slicesDistance,distance_X,focus_distances)
 if strcmpi(input.interpolation_slices,'interpolate')
     for i1 = 1:size(LOS_points.slices,1) % loop over the points of pattern
         Y1 = LOS_points.Coor{i1}(1,:);
@@ -34,7 +34,7 @@ if strcmpi(input.interpolation_slices,'interpolate')
         end
         if length(LOS_points.slicesAv) ~= 1
             VFinalTotal_TimeInt3=VFinalTotal_TimeInt2{i1};
-            VFinalTotal_Time{i1} = weighting_fun(input,LOS_points,VFinalTotal_TimeInt3,distanceSlices);
+            VFinalTotal_Time{i1} = weighting_fun(input,LOS_points,VFinalTotal_TimeInt3,distanceSlices,distance_X,distanceSlices);
         else
             VFinalTotal_Time{i1} = VFinalTotal_TimeInt2;
         end
@@ -101,8 +101,8 @@ elseif strcmpi(input.interpolation_slices,'none') %if you don't interpolate get 
             VFinalTotal_TimeInt2(iTSlice,:) = [nan(1,NansStart) VFinalTotal_TimeInt{iTSlice} nan(1,NansEnd) ];
         end
         if length(LOS_points.slicesAv) ~= 1
-            %             VFinalTotal_Time{i1} = weighting_fun(input,LOS_points,VFinalTotal_TimeInt2,distanceSlices);
-            VFinalTotal_Time{i1} = weighting_fun(input,VFinalTotal_TimeInt2);
+           
+            VFinalTotal_Time{i1} = weighting_fun(input,VFinalTotal_TimeInt2,distanceSlices,distance_X,focus_distances);
         else
             VFinalTotal_Time{i1} = VFinalTotal_TimeInt2;
         end
