@@ -30,7 +30,7 @@ function VFinalTotal_Time = V_spec(input,VFinalTotal_TimeInt3,WeightFun,distan)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-binwidth=.1;
+binwidth=.01;
 i_bin=1;
 if min(VFinalTotal_TimeInt3)~=0 % this if because when min(VFinalTotal_TimeInt3)==0 floorS1 gives nans
     floorS1 = floorS(min(VFinalTotal_TimeInt3),2); % floor the lower limit with specific decimal, here 3 decimals
@@ -60,10 +60,11 @@ for ind_bin = binrang %floorS1:binwidth:ceilS1 %13:binwidth:16 %
     i_bin=i_bin+1;
 end
 SumSpectrum=sum(DSpectrum);
-Fvals = cumsum(SumSpectrum.*dt);
-F = spline(t,[0,Fvals,0]);
-DF = fnder(F);  % computes its first derivative
 
+Fvals = cumsum(SumSpectrum.*dt);
+
+
+maxima=max(SumSpectrum(:));
 % [counts,V_levels]=histcounts(nonzeros(VFinalTotal_TimeInt3'.*WeightFun),'BinWidth',bin_width);
 % [counts1,V_levels1]=histcounts(nonzeros(Spectrum),'BinWidth',bin_width);
 
@@ -72,25 +73,27 @@ DF = fnder(F);  % computes its first derivative
 for ind_peak_method=1:size(input.peak_detection_method,2)
     if strcmpi(input.peak_detection_method{ind_peak_method},"median")
         %Median: Median is calculated as the velocity value where the cdf =0.5
-        VFinalTotal_Time = fit_cdf(t,Fvals/max(Fvals));
+        VFinalTotal_Time = fit_cdf(t,Fvals/max(Fvals)); % CDF normalisation
     elseif strcmpi (input.peak_detection_method{ind_peak_method},"maximum")
         %Max: Computes the maximum of the histogram.
-        fn_DF            = fnplt(DF, 'g', 2);
+        F = spline(t,[0,Fvals,0]); % Cubic spline data interpolation
+        DF = fnder(F);  % computes its first derivative
+        fn_DF            = fnplt(DF);
         [~,n_max]        =(max(fn_DF(2,:)));
         VFinalTotal_Time = fn_DF(1,n_max);
     elseif strcmpi (input.peak_detection_method{ind_peak_method},"centroid")
         %Centroid
         VFinalTotal_Time = sum(SumSpectrum.*binrang)/sum(SumSpectrum);
-        %         fn_DF            = fnplt(DF, 'g', 2);
-        %         new_binranag=linspace(min(binrang),max(binrang),length(fn_DF));
-        
-        %         VFinalTotal_Time = sum(fn_DF(2,:).*new_binranag)/sum(fn_DF(2,:));
-        
-        %         fn_DF            = fnplt(DF, 'g', 2);
-        %         VFinalTotal_Time = spectralCentroid(fn_DF(2,:));
-        %         VFinalTotal_Time = sum(fn_DF(2,:).*vv*binwidth)/sum(fn_DF(2,:)*binwidth);
+%         fn_DF            = fnplt(DF, 'g', 2);        
+%         new_binranag=linspace(min(binrang),max(binrang),length(fn_DF));
+                
+%         VFinalTotal_Time = sum(fn_DF(2,:).*new_binranag)/sum(fn_DF(2,:));
+
+%         fn_DF            = fnplt(DF, 'g', 2);
+%         VFinalTotal_Time = spectralCentroid(fn_DF(2,:));
+%         VFinalTotal_Time = sum(fn_DF(2,:).*vv*binwidth)/sum(fn_DF(2,:)*binwidth);
     elseif strcmpi(input.peak_detection_method{ind_peak_method},"mean")
-        %Mean: Computes the mean of the values whithin the probe volume
+        %Mean: Computes the mean of the values whithin the probe volume        
         VFinalTotal_Time = sum(WeightFun'.*VFinalTotal_TimeInt3)/sum(WeightFun); %#ok<*AGROW>
     end
 end
@@ -99,8 +102,8 @@ end
 
 
 
-%
-%
+% 
+% 
 % figure, bar(binrang,SumSpectrum,'hist')
 % hold on
 % fnplt(DF, 'r', 2)

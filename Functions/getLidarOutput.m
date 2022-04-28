@@ -72,7 +72,7 @@ Uref                =  windfield.URef; % Mean velocity of the windfied (m/s)
 dz                  =  windfield.grid.dz;
 dy                  =  windfield.grid.dy;
 distanceSlices      =  Uref*dt; % Distance step  between consecutive slices(m)
-
+distance_X          = gridtime*distanceSlices;
 % Manipulation of data before calculations:
 for i=1:gridtime
     SqueezeCompU{i}=squeeze(compU(:,i,:));
@@ -169,18 +169,25 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NEW
 % If the number of selected points within the probe length (input.points_av_slice) is higher than those contained in it, take all the points 
+%%%%%%%%%%
 if points_av_slice> floor(input.distance_av_space/distanceSlices) || strcmpi(input.points_av_slice,'A')
     points_av_slice=floor(input.distance_av_space/distanceSlices);
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%
 
 if distance_av_slice ~= 0
-    SliceVecInt = round((-distance_av_slice:distance_av_slice/points_av_slice:distance_av_slice))*distanceSlices;
+    %%%%%%%%%%%%%%%%%%%%%
+    ul=0:distanceSlices:floor(input.distance_av_space ); % upper limits %Change to avoid losing intermediate points when rounding
+    ll=fliplr(0:-distanceSlices:-floor(input.distance_av_space )); % lower limits %Change to avoid losing intermediate points when rounding
+    SliceVecInt = unique([ll,ul],'stable') ; %Change to avoid losing intermediate points when rounding
+    %%%%%%%%%%%%%%%%%%%%
+%     SliceVecInt2 = round((-distance_av_slice:distance_av_slice/points_av_slice:distance_av_slice))*distanceSlices;
+
     focus_distances = SliceVecInt+ref_plane_dist;
 else
     focus_distances = ref_plane_dist;  % no slices to be averaged, single point measurement
 end
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %loop over planes to get points
 for ifDist = 1:length(focus_distances)
     iplane = focus_distances(ifDist); % requested planes are all the planes along the distance (slicesDistance)
@@ -194,8 +201,10 @@ for ifDist = 1:length(focus_distances)
         end
     end
 end
-
-LOS_points.slicesAv = round(-distance_av_slice:distance_av_slice/points_av_slice:distance_av_slice);
+%NEW%%%%%%%%%%%%%%%%%%%%%%%
+LOS_points.slicesAv = -(length(focus_distances)-1)/2:1:(length(focus_distances)-1)/2;
+% LOS_points.slicesAv = round(-distance_av_slice:distance_av_slice/points_av_slice:distance_av_slice);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Check for the case when we request only 1 slice to be averaged
 if [isempty(LOS_points.slicesAv) || any(isnan(LOS_points.slicesAv))]  && distance_av_slice==0 %#ok<*NBRAK,BDSCA>
@@ -215,9 +224,9 @@ end
 % Here is calculated the mean velocity of all the points in the pattern every time LiDAR completes one
 % pattern (frequency of the pattern) taking into account timstep_meas.
 
-[VFinalTotal_U,VFinalTotal_Time_U,~,~] = interpolationFun(input,compU,LOS_points,gridy,gridz,distanceSlices,slicesDistance,focus_distances);
-[VFinalTotal_V,VFinalTotal_Time_V,~,~] = interpolationFun(input,compV,LOS_points,gridy,gridz,distanceSlices,slicesDistance,focus_distances);
-[VFinalTotal_W,VFinalTotal_Time_W,~,~] = interpolationFun(input,compW,LOS_points,gridy,gridz,distanceSlices,slicesDistance,focus_distances);
+[VFinalTotal_U,VFinalTotal_Time_U,~,~] = interpolationFun(input,compU,LOS_points,gridy,gridz,distanceSlices,slicesDistance,distance_X,focus_distances);
+[VFinalTotal_V,VFinalTotal_Time_V,~,~] = interpolationFun(input,compV,LOS_points,gridy,gridz,distanceSlices,slicesDistance,distance_X,focus_distances);
+[VFinalTotal_W,VFinalTotal_Time_W,~,~] = interpolationFun(input,compW,LOS_points,gridy,gridz,distanceSlices,slicesDistance,distance_X,focus_distances);
 
 %% LOS transformations. From cartesian to ray coordinates and back with the cyclops dilema (or something else.. )
 
